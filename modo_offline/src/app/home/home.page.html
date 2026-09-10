@@ -1,0 +1,44 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Controla<span class="mas">+</span></ion-title>
+    <!-- 2.1 Píldora ONLINE / OFFLINE -->
+    <app-network-status slot="end" vista="pill"></app-network-status>
+  </ion-toolbar>
+  <!-- 2.2 Banner offline fijo · 2.4 Banner de reconexión (3 s) -->
+  <app-network-status vista="banner"></app-network-status>
+</ion-header>
+
+<ion-content>
+  <section class="balance">
+    <p class="label">Balance disponible</p>
+    <p class="cifra">{{ balance$ | async | currency:'DOP':'RD$ ':'1.2-2' }}</p>
+    <p class="meta">Incluye los movimientos guardados en este teléfono</p>
+  </section>
+
+  <h2 class="seccion">Movimientos recientes</h2>
+
+  <ion-list lines="none">
+    <ion-item
+      *ngFor="let m of (lista$ | async); trackBy: trackById"
+      class="mov"
+      [class.pendiente]="m.estado === 'pendiente'"
+      [class.ingreso]="m.tipo === 'ingreso'"
+    >
+      <ion-label>
+        <h3>{{ m.concepto }}</h3>
+        <p class="fecha">{{ m.fecha | date:'d MMM · h:mm a' }}</p>
+        <!-- 2.3 Etiqueta por movimiento creado sin conexión -->
+        <p class="tag-pendiente" *ngIf="m.estado === 'pendiente'">{{ etiquetaPendiente }}</p>
+      </ion-label>
+      <ion-note slot="end" class="monto">
+        {{ m.tipo === 'ingreso' ? '+' : '-' }} {{ m.monto | currency:'DOP':'RD$ ':'1.2-2' }}
+      </ion-note>
+    </ion-item>
+  </ion-list>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="nuevoMovimiento()" aria-label="Registrar movimiento">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

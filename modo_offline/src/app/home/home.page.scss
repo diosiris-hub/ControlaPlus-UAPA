@@ -1,0 +1,132 @@
+/* Línea gráfica Cyber de Controla+ (documento de diseño, sección 5) */
+$grafito: #0a0f14;
+$hielo: #e8f6f5;
+$cian: #22e0d6;
+$azul: #4c7bff;
+$card: #121a22;
+$borde: #1e2a35;
+$coral: #ff5a6e;
+$ambar: #ffc24b;
+$muted: #6b7a85;
+$mono: 'Martian Mono', ui-monospace, Menlo, monospace;
+$display: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+
+ion-toolbar {
+  --background: #{$grafito};
+  --color: #{$hielo};
+  --border-color: #{$borde};
+  --border-width: 0 0 1px 0;
+  --border-style: solid;
+}
+
+ion-title {
+  font-family: $display;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-size: 22px;
+  .mas { color: $cian; }
+}
+
+ion-content {
+  --background: #{$grafito};
+  --color: #{$hielo};
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 120px;
+}
+
+.balance {
+  background: $card;
+  border: 1px solid $borde;
+  border-radius: 16px;
+  padding: 18px;
+
+  .label {
+    margin: 0 0 6px;
+    font-family: $mono;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: $muted;
+  }
+  .cifra {
+    margin: 0 0 8px;
+    font-family: $display;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    font-size: 30px;
+    line-height: 1.1;
+  }
+  .meta {
+    margin: 0;
+    font-family: $mono;
+    font-size: 11px;
+    color: $azul;
+  }
+}
+
+.seccion {
+  margin: 26px 0 12px;
+  font-family: $mono;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $cian;
+}
+
+ion-list {
+  background: transparent;
+  padding: 0;
+}
+
+ion-item.mov {
+  --background: #{$card};
+  --color: #{$hielo};
+  --border-radius: 14px;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --min-height: 64px;
+  margin-bottom: 12px;
+  border: 1px solid $borde;
+  border-radius: 14px;
+
+  h3 {
+    font-family: $display;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: 12px;
+    color: $hielo;
+  }
+  .fecha {
+    font-family: $mono;
+    font-size: 11px;
+    color: $muted;
+  }
+  .monto {
+    font-family: $mono;
+    font-weight: 700;
+    font-size: 13px;
+    color: $coral;
+  }
+  &.ingreso .monto { color: $cian; }
+
+  /* 2.3 Etiqueta "Pendiente de sincronizar": borde y texto ámbar, 12 px */
+  &.pendiente { border-color: $ambar; }
+  .tag-pendiente {
+    margin-top: 6px;
+    font-family: $mono;
+    font-size: 12px;
+    color: $ambar;
+  }
+}
+
+ion-fab-button {
+  --background: #{$cian};
+  --color: #{$grafito};
+  --box-shadow: none;
+  width: 64px;
+  height: 64px;
+}

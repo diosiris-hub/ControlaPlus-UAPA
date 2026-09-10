@@ -1,0 +1,27 @@
+flowchart TD
+  A([Inicio de la app]) --> B["NetworkService.init()"]
+  B --> C["Network.getStatus()"]
+  C --> D{"¿connected?"}
+  D -- "Sí" --> E["Píldora ONLINE (punto cian)"]
+  D -- "No" --> F["Píldora OFFLINE (punto coral)<br/>+ banner rojo fijo"]
+  E --> G["Network.addListener('networkStatusChange')<br/>escucha permanente"]
+  F --> G
+  G --> H{"Nuevo estado<br/>recibido"}
+  H -- "connected = false" --> F2["Píldora OFFLINE + banner rojo fijo<br/>La app sigue operativa (modo offline)"]
+  F2 -.->|"sigue escuchando"| G
+  H -- "connected = true" --> I["Banner cian 'Conexión restablecida' (3 s)<br/>Píldora ONLINE"]
+  I --> J["SyncService.sincronizar('reconexión')"]
+  J --> K{"¿Hay movimientos<br/>pendientes?"}
+  K -- "No" --> L([Fin: app sincronizada])
+  K -- "Sí" --> M["ApiService.enviarMovimientos(pendientes)<br/>POST /movimientos/lote"]
+  M --> N{"¿Éxito?"}
+  N -- "Sí" --> O["marcarSincronizados()<br/>Toast: 'Sincronización completada: N…'"]
+  N -- "No" --> P["Toast ámbar: 'Volvió la conexión, pero…'<br/>Reintento automático en 6 s"]
+  P -.->|"reintento"| J
+  O --> L
+  classDef ok fill:#E6FBFA,stroke:#1AAFA8,color:#0A0F14;
+  classDef ko fill:#FFECEF,stroke:#FF5A6E,color:#0A0F14;
+  classDef warn fill:#FFF6E0,stroke:#E0A400,color:#0A0F14;
+  class E,I,O ok;
+  class F,F2 ko;
+  class P warn;

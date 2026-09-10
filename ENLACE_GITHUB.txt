@@ -1,0 +1,8 @@
+Repositorio del proyecto (AP4 · Módulo de conectividad WiFi · Controla+)
+
+https://github.com/franciscodiaz22/ControlaPlus-UAPA
+
+Rama: main
+Contenido: código del detector de red (detector_red), modo offline (modo_offline),
+documentación técnica (documentacion), documento de diseño de interfaz,
+prototipo interactivo (index.html) y capturas de pantalla.

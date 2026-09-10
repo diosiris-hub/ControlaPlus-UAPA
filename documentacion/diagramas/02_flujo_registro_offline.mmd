@@ -1,0 +1,17 @@
+flowchart TD
+  A([Usuario confirma un movimiento]) --> B["OfflineStorageService.agregar()<br/>estado = 'pendiente' · siempre local primero"]
+  B --> C{"¿Hay conexión?<br/>NetworkService.isOnline"}
+  C -- "No (modo offline)" --> D["Toast: 'Movimiento guardado en tu teléfono.<br/>Se enviará automáticamente al reconectar.'"]
+  D --> E["Tarjeta con etiqueta ámbar<br/>⏳ Pendiente de sincronizar"]
+  E --> F([Queda en cola hasta que vuelva la conexión])
+  C -- "Sí (online)" --> G["ApiService.enviarMovimientos([movimiento])"]
+  G --> H{"¿Éxito?"}
+  H -- "Sí" --> I["marcarSincronizados([id])<br/>Toast: 'Movimiento enviado al servidor.'"]
+  H -- "No" --> J["Queda pendiente<br/>Toast ámbar + SyncService.programarReintento()"]
+  J --> F
+  classDef ok fill:#E6FBFA,stroke:#1AAFA8,color:#0A0F14;
+  classDef warn fill:#FFF6E0,stroke:#E0A400,color:#0A0F14;
+  classDef local fill:#EEF2FF,stroke:#4C7BFF,color:#0A0F14;
+  class I ok;
+  class D,E warn;
+  class B local;

@@ -1,0 +1,25 @@
+# macOS / exFAT (archivos AppleDouble y metadatos del Finder)
+._*
+.DS_Store
+.Spotlight-V100
+.fseventsd
+.Trashes
+.TemporaryItems
+
+# Archivos de bloqueo de Microsoft Office
+~$*
+
+# Windows
+Thumbs.db
+
+# Configuración local de herramientas
+.claude/
+
+# Paquete de entrega (se genera a partir de las carpetas del repositorio)
+*.zip
+
+# Dependencias y compilados (por si se agrega el proyecto Ionic)
+node_modules/
+dist/
+www/
+.angular/

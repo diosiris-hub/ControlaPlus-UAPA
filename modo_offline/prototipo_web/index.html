@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controla+ · Prototipo de conectividad</title>
+<meta name="description" content="Prototipo interactivo del indicador de conectividad y modo offline de Controla+ (AP4 · Módulo de Conectividad WiFi).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@800;900&family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   Controla+ · Línea gráfica Cyber
+   Tokens tomados del documento "Diseño de interfaz — Indicador de
+   conectividad" (sección 5) y del manual de marca de la Semana 3.
+   ===================================================================== */
+:root {
+  --grafito: #0A0F14;      /* fondo de la app / barra superior      */
+  --hielo:   #E8F6F5;      /* texto principal                       */
+  --cian:    #22E0D6;      /* acento primario · estado online       */
+  --azul:    #4C7BFF;      /* acento secundario · metadatos         */
+  --card:    #121A22;      /* fondo de tarjetas, píldora y toast    */
+  --borde:   #1E2A35;      /* borde de tarjetas                     */
+  --coral:   #FF5A6E;      /* estado offline · barra del banner     */
+  --banner-off: #3A1218;   /* fondo del banner offline              */
+  --ambar:   #FFC24B;      /* etiqueta "Pendiente de sincronizar"   */
+  --muted:   #6B7A85;
+  --secundario: #9FB0BA;
+  --pagina:  #05080B;      /* fondo de la página que rodea al móvil */
+
+  --display: 'Unbounded', 'Avenir Next', 'Helvetica Neue', system-ui, sans-serif;
+  --mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--pagina);
+  color: var(--hielo);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 32px 16px 48px;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; }
+input { font-family: inherit; }
+
+/* ---------- Encabezado de la página ---------- */
+.page-head { max-width: 1120px; margin: 0 auto 28px; }
+.page-head .kicker {
+  font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--cian); margin: 0 0 8px;
+}
+.page-head h1 {
+  font-family: var(--display); font-weight: 800; letter-spacing: -.03em;
+  font-size: clamp(22px, 3.2vw, 32px); line-height: 1.1; margin: 0 0 10px;
+}
+.page-head h1 span { color: var(--cian); }
+.page-head p { color: var(--secundario); font-size: 12px; max-width: 68ch; margin: 0; }
+
+/* ---------- Disposición: móvil + panel ---------- */
+.stage {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; gap: 32px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
+}
+body.captura .panel, body.captura .page-head, body.captura .page-foot { display: none; }
+
+/* =====================================================================
+   MÓVIL (marco de dispositivo)
+   ===================================================================== */
+.phone {
+  width: 100%; max-width: 390px; height: 844px; max-height: calc(100dvh - 40px); min-height: 640px;
+  background: var(--grafito);
+  border: 1px solid var(--borde);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  display: flex; flex-direction: column;
+  flex: 0 0 auto;
+}
+
+/* Barra de estado del sistema operativo */
+.statusbar {
+  height: 44px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-weight: 700; letter-spacing: .02em; flex: 0 0 auto;
+}
+.statusbar .icons { display: flex; gap: 6px; align-items: center; }
+.statusbar .icons i { display: inline-block; width: 16px; height: 10px; border-radius: 2px; background: var(--hielo); opacity: .9; }
+.statusbar .icons i.bat { width: 24px; border: 1.5px solid var(--hielo); background: transparent; position: relative; }
+.statusbar .icons i.bat::after { content: ""; position: absolute; inset: 1.5px; right: 5px; background: var(--hielo); border-radius: 1px; }
+
+/* Barra superior de la app: logo + wordmark + píldora de estado */
+.topbar {
+  height: 60px; padding: 0 16px; display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--borde); flex: 0 0 auto;
+}
+.logo-tile {
+  width: 40px; height: 40px; border-radius: 29%; background: var(--cian);
+  display: grid; place-items: center; flex: 0 0 auto;
+}
+.logo-tile::before {
+  content: "+"; color: var(--grafito); font-family: var(--display); font-weight: 900;
+  font-size: 30px; line-height: 1; margin-top: -3px;
+}
+.wordmark { font-family: var(--display); font-weight: 800; letter-spacing: -.035em; font-size: 22px; flex: 1 1 auto; white-space: nowrap; }
+.wordmark b { color: var(--cian); font-weight: 800; }
+
+/* 2.1 Píldora de estado (NetworkStatusComponent) */
+.pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1px solid var(--borde); border-radius: 999px;
+  padding: 8px 16px 8px 12px; height: 36px;
+  font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--hielo);
+  transition: border-color .25s;
+}
+.pill .dot {
+  width: 16px; height: 16px; border-radius: 50%; background: var(--cian); color: var(--cian);
+  animation: latido 2.4s ease-out infinite;
+}
+.pill.offline .dot { background: var(--coral); color: var(--coral); }
+@keyframes latido { 0% { box-shadow: 0 0 0 0 currentColor; } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* 2.2 Banner de modo offline (fijo mientras dure la desconexión) */
+.banner { display: none; flex: 0 0 auto; animation: bajar .25s ease-out; }
+.banner.visible { display: block; }
+.banner-offline {
+  background: var(--banner-off); border-left: 6px solid var(--coral);
+  padding: 12px 20px 14px 18px;
+}
+.banner-offline .titulo { color: var(--coral); font-weight: 700; font-size: 14px; letter-spacing: .01em; margin: 0 0 4px; }
+.banner-offline .texto { color: var(--hielo); font-size: 12px; line-height: 1.5; margin: 0; }
+
+/* 2.4 Banner de reconexión (3 segundos) */
+.banner-online {
+  background: var(--cian); color: var(--grafito);
+  padding: 13px 20px; font-family: var(--display); font-weight: 800; font-size: 13px; letter-spacing: -.01em;
+}
+@keyframes bajar { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Contenido desplazable */
+.content { flex: 1 1 auto; overflow-y: auto; padding: 16px 16px 120px; scrollbar-width: none; }
+.content::-webkit-scrollbar { display: none; }
+
+.card {
+  background: var(--card); border: 1px solid var(--borde); border-radius: 16px;
+  padding: 18px 18px 16px;
+}
+.card .label { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.card .cifra { font-family: var(--display); font-weight: 800; letter-spacing: -.035em; font-size: 30px; line-height: 1.1; margin: 0 0 8px; }
+.card .meta { color: var(--azul); font-size: 11px; margin: 0; }
+
+.section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--cian); margin: 26px 0 12px;
+}
+
+/* Tarjeta de movimiento */
+.mov {
+  background: var(--card); border: 1px solid var(--borde); border-radius: 14px;
+  padding: 14px 16px; margin-bottom: 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px;
+  transition: border-color .3s;
+  animation: aparecer .3s ease-out;
+}
+.mov .info { min-width: 0; }
+.mov .concepto { font-family: var(--display); font-weight: 800; letter-spacing: -.02em; font-size: 12px; line-height: 1.35; margin: 0 0 4px; }
+.mov .fecha { color: var(--muted); font-size: 11px; margin: 0; }
+.mov .monto { font-weight: 700; font-size: 13px; white-space: nowrap; letter-spacing: .01em; }
+.mov.gasto .monto { color: var(--coral); }
+.mov.ingreso .monto { color: var(--cian); }
+/* 2.3 Etiqueta "Pendiente de sincronizar" (fila propia, a lo ancho de la tarjeta) */
+.mov.pendiente { border-color: var(--ambar); }
+.mov .tag-pendiente {
+  grid-column: 1 / -1; color: var(--ambar); font-size: 12px;
+  margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,194,75,.35);
+}
+.vacio { color: var(--muted); font-size: 12px; text-align: center; padding: 24px 0; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Botón flotante (+) */
+.fab {
+  position: absolute; right: 24px; bottom: 96px; width: 64px; height: 64px; border-radius: 50%;
+  background: var(--cian); border: 0; color: var(--grafito);
+  font-family: var(--display); font-weight: 900; font-size: 36px; line-height: 1; padding: 0 0 4px;
+  display: grid; place-items: center; z-index: 5;
+}
+.fab:active { transform: scale(.96); }
+
+/* Navegación inferior */
+.bottomnav {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 72px; z-index: 6;
+  background: var(--grafito); border-top: 1px solid var(--borde);
+  display: grid; grid-template-columns: repeat(4, 1fr); align-items: center; padding-bottom: 6px;
+}
+.bottomnav a { text-decoration: none; color: var(--muted); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bottomnav a i { width: 10px; height: 10px; border-radius: 50%; background: currentColor; display: block; }
+.bottomnav a.activo { color: var(--cian); font-weight: 700; }
+
+/* Toast (inferior, 4 s) */
+.toast {
+  position: absolute; left: 16px; right: 16px; bottom: 90px; z-index: 8;
+  background: var(--card); border: 2px solid var(--cian); border-radius: 14px;
+  padding: 14px 18px; font-size: 12px; line-height: 1.5; color: var(--hielo);
+  opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .25s, transform .25s;
+}
+.toast.visible { opacity: 1; transform: none; pointer-events: auto; }
+.toast.ambar { border-color: var(--ambar); }
+.toast.oscuro { border-color: var(--borde); }
+
+/* Hoja de registro de movimiento */
+.sheet-backdrop {
+  position: absolute; inset: 0; background: rgba(5,8,11,.72); z-index: 20; display: none; align-items: flex-end;
+}
+.sheet-backdrop.visible { display: flex; }
+.sheet {
+  width: 100%; background: var(--grafito); border-top: 1px solid var(--borde); border-radius: 24px 24px 0 0;
+  padding: 18px 20px 28px; margin: 0; animation: subir .25s ease-out;
+}
+@keyframes subir { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet h3 { font-family: var(--display); font-weight: 800; letter-spacing: -.02em; font-size: 18px; margin: 0 0 4px; }
+.sheet h3::before { content: "• "; color: var(--cian); }
+.sheet .hint { color: var(--muted); font-size: 11px; margin: 0 0 16px; }
+.sheet .hint.off { color: var(--ambar); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--borde); border-radius: 999px; padding: 4px; margin-bottom: 14px; }
+.seg button { border: 0; background: transparent; color: var(--muted); border-radius: 999px; padding: 10px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.seg button.on { background: var(--cian); color: var(--grafito); }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.field input {
+  width: 100%; background: #0D141B; border: 1px solid var(--borde); border-radius: 12px;
+  color: var(--hielo); padding: 12px 14px; font-size: 14px; outline: none;
+}
+.field input:focus { border-color: var(--cian); box-shadow: 0 0 0 4px rgba(34,224,214,.12); }
+.btn-primary {
+  width: 100%; border: 0; border-radius: 999px; background: var(--cian); color: var(--grafito);
+  padding: 14px; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-top: 6px;
+}
+.btn-text { width: 100%; background: none; border: 0; color: var(--secundario); padding: 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+
+/* =====================================================================
+   PANEL DE DEMOSTRACIÓN (fuera del móvil; no forma parte de la app)
+   ===================================================================== */
+.panel { flex: 1 1 320px; max-width: 460px; display: flex; flex-direction: column; gap: 16px; }
+.panel .box { background: var(--card); border: 1px solid var(--borde); border-radius: 16px; padding: 18px; }
+.panel h2 { font-family: var(--display); font-weight: 800; letter-spacing: -.02em; font-size: 15px; margin: 0 0 12px; }
+.panel h2 small { display: block; font-family: var(--mono); font-weight: 400; color: var(--muted); font-size: 11px; letter-spacing: 0; margin-top: 2px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--borde); }
+.row:first-of-type { border-top: 0; }
+.row .k { font-size: 12px; }
+.row .k small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
+.estado-real { font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+.estado-real.ok { color: var(--cian); } .estado-real.ko { color: var(--coral); }
+
+.switch { position: relative; width: 46px; height: 26px; flex: 0 0 auto; cursor: pointer; }
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.switch span { position: absolute; inset: 0; background: #0D141B; border: 1px solid var(--borde); border-radius: 999px; transition: .2s; }
+.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: .2s; }
+.switch input:checked + span { background: rgba(255,90,110,.16); border-color: var(--coral); }
+.switch input:checked + span::after { transform: translateX(20px); background: var(--coral); }
+.switch.ambar input:checked + span { background: rgba(255,194,75,.16); border-color: var(--ambar); }
+.switch.ambar input:checked + span::after { background: var(--ambar); }
+.switch.cian input:checked + span { background: rgba(34,224,214,.16); border-color: var(--cian); }
+.switch.cian input:checked + span::after { background: var(--cian); }
+
+.acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.acciones button {
+  border: 1px solid var(--borde); background: #0D141B; color: var(--hielo); border-radius: 12px;
+  padding: 12px 10px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-align: left; line-height: 1.4;
+}
+.acciones button small { display: block; font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 10px; margin-top: 3px; }
+.acciones button:hover { border-color: var(--cian); }
+.acciones button.a { border-left: 4px solid var(--cian); }
+.acciones button.b { border-left: 4px solid var(--coral); }
+.acciones button.c { border-left: 4px solid var(--azul); }
+.acciones button.full { grid-column: 1 / -1; }
+.acciones button.peligro:hover { border-color: var(--coral); }
+
+.log { list-style: none; margin: 0; padding: 0; max-height: 220px; overflow: auto; font-size: 11px; }
+.log li { padding: 6px 0; border-top: 1px solid var(--borde); color: var(--secundario); display: flex; gap: 10px; }
+.log li:first-child { border-top: 0; }
+.log li time { color: var(--muted); flex: 0 0 auto; }
+.log li.on { color: var(--cian); } .log li.off { color: var(--coral); } .log li.warn { color: var(--ambar); } .log li.info { color: var(--azul); }
+
+.page-foot { max-width: 1120px; margin: 28px auto 0; color: var(--muted); font-size: 11px; }
+.page-foot code { color: var(--secundario); }
+
+@media (max-width: 860px) {
+  body { padding: 20px 16px 40px; }
+  .phone { height: 780px; }
+  .panel { max-width: 390px; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <p class="kicker">AP4 · Módulo de conectividad WiFi · Prototipo interactivo</p>
+  <h1>Controla<span>+</span> · Indicador de conectividad y modo offline</h1>
+  <p>El móvil reacciona a la red real de este navegador (activa el modo avión o apaga el WiFi) y también al interruptor de simulación del panel. Los movimientos creados sin conexión se guardan en el dispositivo (localStorage) y se sincronizan solos al volver la conexión.</p>
+</header>
+
+<main class="stage">
+
+  <!-- ================= MÓVIL ================= -->
+  <section class="phone" aria-label="Pantalla de Controla+">
+    <div class="statusbar">
+      <span id="reloj">9:41</span>
+      <span class="icons"><i></i><i class="bat"></i></span>
+    </div>
+
+    <div class="topbar">
+      <div class="logo-tile" aria-hidden="true"></div>
+      <div class="wordmark">Controla<b>+</b></div>
+      <!-- NetworkStatusComponent · píldora -->
+      <div class="pill" id="pill" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="pillTexto">ONLINE</span>
+      </div>
+    </div>
+
+    <!-- NetworkStatusComponent · banner offline (fijo) -->
+    <div class="banner banner-offline" id="bannerOffline" role="alert">
+      <p class="titulo">Sin conexión a Internet</p>
+      <p class="texto">Tus movimientos se guardarán y se sincronizarán cuando vuelva la conexión.</p>
+    </div>
+    <!-- NetworkStatusComponent · banner de reconexión (3 s) -->
+    <div class="banner banner-online" id="bannerOnline" role="status">Conexión restablecida</div>
+
+    <div class="content" id="content">
+      <div class="card">
+        <p class="label">Balance disponible</p>
+        <p class="cifra" id="balance">RD$ 24,850.00</p>
+        <p class="meta" id="balanceMeta">Actualizado hoy · 9:41 a. m.</p>
+      </div>
+
+      <h2 class="section-title">Movimientos recientes</h2>
+      <div id="lista"></div>
+    </div>
+
+    <button class="fab" id="fab" aria-label="Registrar movimiento">+</button>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <nav class="bottomnav" aria-label="Navegación principal">
+      <a href="#" class="activo"><i></i>Inicio</a>
+      <a href="#"><i></i>Movs.</a>
+      <a href="#"><i></i>Reportes</a>
+      <a href="#"><i></i>Perfil</a>
+    </nav>
+
+    <!-- Hoja de registro de movimiento -->
+    <div class="sheet-backdrop" id="sheetBackdrop">
+      <form class="sheet" id="formMov" autocomplete="off">
+        <h3>Nuevo movimiento</h3>
+        <p class="hint" id="sheetHint">Se enviará al servidor al confirmar.</p>
+        <div class="seg" role="radiogroup" aria-label="Tipo de movimiento">
+          <button type="button" class="on" data-tipo="gasto">Gasto</button>
+          <button type="button" data-tipo="ingreso">Ingreso</button>
+        </div>
+        <div class="field">
+          <label for="concepto">Concepto</label>
+          <input id="concepto" name="concepto" placeholder="Ej. Colmado Don José" maxlength="40" required>
+        </div>
+        <div class="field">
+          <label for="monto">Monto (RD$)</label>
+          <input id="monto" name="monto" type="number" inputmode="decimal" min="1" step="0.01" placeholder="0.00" required>
+        </div>
+        <button type="submit" class="btn-primary">Confirmar registro</button>
+        <button type="button" class="btn-text" id="cancelar">Cancelar</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= PANEL DE DEMOSTRACIÓN ================= -->
+  <aside class="panel" aria-label="Panel de demostración">
+    <div class="box">
+      <h2>Estado de red <small>NetworkService · navigator.onLine + eventos online/offline</small></h2>
+      <div class="row">
+        <div class="k">Red real del navegador<small>Cambia al activar el modo avión o apagar el WiFi</small></div>
+        <span class="estado-real ok" id="estadoReal">CONECTADO</span>
+      </div>
+      <div class="row">
+        <div class="k">Simular modo avión<small>Fuerza el estado OFFLINE sin tocar el WiFi</small></div>
+        <label class="switch"><input type="checkbox" id="swAvion"><span></span></label>
+      </div>
+      <div class="row">
+        <div class="k">Simular fallo del servidor<small>La sincronización falla y se reintenta sola</small></div>
+        <label class="switch ambar"><input type="checkbox" id="swFallo"><span></span></label>
+      </div>
+      <div class="row">
+        <div class="k">Modo captura<small>Oculta este panel para tomar capturas limpias (Esc para salir)</small></div>
+        <label class="switch cian"><input type="checkbox" id="swCaptura"><span></span></label>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>Pantallas del documento <small>Reproduce los tres escenarios de la sección 3</small></h2>
+      <div class="acciones">
+        <button class="a" id="btnA">Pantalla A<small>Estado normal con conexión</small></button>
+        <button class="b" id="btnB">Pantalla B<small>Sin conexión + movimiento pendiente</small></button>
+        <button class="c full" id="btnC">Pantalla C<small>Reconexión: banner cian + toast de sincronización</small></button>
+        <button id="btnNuevo">Registrar movimiento<small>Abre la hoja de registro</small></button>
+        <button class="peligro" id="btnReset">Restablecer datos<small>Borra el almacenamiento local</small></button>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>Registro de eventos <small>Lo que en Ionic verías en la consola</small></h2>
+      <ul class="log" id="log"></ul>
+    </div>
+  </aside>
+</main>
+
+<footer class="page-foot">
+  Equivalencias con el proyecto Ionic + Angular + Capacitor: <code>NetworkService</code> ↔ <code>network.service.ts</code> (plugin <code>@capacitor/network</code>),
+  <code>OfflineStorageService</code> ↔ almacenamiento local (<code>@ionic/storage</code>), <code>SyncService</code> ↔ sincronización de pendientes,
+  <code>NetworkStatusComponent</code> ↔ píldora y banners.
+</footer>
+
+<script>
+/* =====================================================================
+   CATÁLOGO DE MENSAJES (sección 4 del documento de diseño)
+   Textos exactos; se centralizan para que la app y la documentación
+   usen siempre la misma redacción.
+   ===================================================================== */
+const MENSAJES = {
+  pillOnline:  'ONLINE',
+  pillOffline: 'OFFLINE',
+  toastGuardadoOffline: 'Movimiento guardado en tu teléfono. Se enviará automáticamente al reconectar.',
+  toastEnviadoOnline:   'Movimiento enviado al servidor.',
+  etiquetaPendiente:    '⏳ Pendiente de sincronizar',
+  toastSyncOk: n => `Sincronización completada: ${n} movimiento${n === 1 ? '' : 's'} enviado${n === 1 ? '' : 's'} al servidor.`,
+  toastSyncError: 'Volvió la conexión, pero algunos movimientos no se enviaron. Lo intentaremos de nuevo en unos momentos.'
+};
+
+const DURACION_BANNER_RECONEXION = 3000; // 3 s (spec)
+const DURACION_TOAST = 4000;             // 4 s (spec)
+const REINTENTO_SYNC = 6000;             // reintento tras un fallo de sincronización
+
+/* =====================================================================
+   Demo  ·  panel lateral (no forma parte de la app)
+   Se declara primero porque los servicios escriben en su registro.
+   ===================================================================== */
+const Demo = (() => {
+  const $ = id => document.getElementById(id);
+  function log(msg, tipo = '') {
+    const ul = $('log'); if (!ul) return;
+    const li = document.createElement('li'); li.className = tipo;
+    const t = document.createElement('time'); t.textContent = new Date().toLocaleTimeString('es-DO', { hour12: false });
+    li.appendChild(t); li.appendChild(document.createTextNode(msg));
+    ul.prepend(li);
+    while (ul.children.length > 40) ul.removeChild(ul.lastChild);
+  }
+  function estadoReal(ok) {
+    const e = $('estadoReal'); if (!e) return;
+    e.textContent = ok ? 'CONECTADO' : 'SIN RED';
+    e.className = 'estado-real ' + (ok ? 'ok' : 'ko');
+  }
+  return { log, estadoReal };
+})();
+
+/* =====================================================================
+   NetworkService  ·  equivalente a network.service.ts
+   ---------------------------------------------------------------------
+   En Ionic/Capacitor:
+     const status = await Network.getStatus();
+     Network.addListener('networkStatusChange', s => this.isOnline = s.connected);
+   En el navegador se usan navigator.onLine y los eventos 'online' /
+   'offline' de window. El interruptor "modo avión" del panel se combina
+   con el estado real para poder demostrar el flujo sin apagar el WiFi.
+   ===================================================================== */
+const NetworkService = (() => {
+  let realOnline = navigator.onLine;   // estado reportado por el sistema
+  let simuladoOffline = false;         // interruptor del panel de demo
+  let ultimoEstado = realOnline;       // para notificar solo cambios reales
+  const suscriptores = new Set();
+
+  const connected = () => realOnline && !simuladoOffline;
+
+  function notificar(origen) {
+    const actual = connected();
+    if (actual === ultimoEstado) return;   // sin cambio efectivo → no emitir
+    ultimoEstado = actual;
+    suscriptores.forEach(fn => fn(actual, origen));
+  }
+
+  // Equivalente a Network.addListener('networkStatusChange', ...)
+  window.addEventListener('online',  () => { realOnline = true;  Demo.estadoReal(true);  notificar('sistema'); });
+  window.addEventListener('offline', () => { realOnline = false; Demo.estadoReal(false); notificar('sistema'); });
+
+  return {
+    get connected() { return connected(); },      // equivalente a Network.getStatus()
+    get realOnline() { return realOnline; },
+    onChange(fn) { suscriptores.add(fn); return () => suscriptores.delete(fn); },
+    simularModoAvion(activo) { simuladoOffline = !!activo; notificar('simulación'); }
+  };
+})();
+
+/* =====================================================================
+   OfflineStorageService  ·  persistencia local (localStorage)
+   ---------------------------------------------------------------------
+   En el proyecto Ionic se usa @ionic/storage con la misma interfaz.
+   Cada movimiento tiene un campo `estado`: 'sincronizado' | 'pendiente'.
+   Patrón offline-first: todo movimiento se guarda primero en el
+   dispositivo; después se intenta enviar al servidor.
+   ===================================================================== */
+const OfflineStorageService = (() => {
+  const KEY = 'controlaplus.movimientos';
+  const BALANCE_BASE = 21580;   // saldo previo a los movimientos de ejemplo (→ RD$ 24,850.00)
+
+  function semilla() {
+    const hoy = new Date(); const ayer = new Date(); ayer.setDate(hoy.getDate() - 1);
+    const t = (d, h, m) => { const x = new Date(d); x.setHours(h, m, 0, 0); return x.toISOString(); };
+    return [
+      { id: 's1', concepto: 'Supermercado La Sirena', monto: 1250, tipo: 'gasto',   fecha: t(hoy, 10, 20), estado: 'sincronizado' },
+      { id: 's2', concepto: 'Pago recibido — Cliente', monto: 5000, tipo: 'ingreso', fecha: t(hoy,  8,  5), estado: 'sincronizado' },
+      { id: 's3', concepto: 'Farmacia Carol',          monto: 480,  tipo: 'gasto',   fecha: t(ayer, 18, 40), estado: 'sincronizado' }
+    ];
+  }
+  function leer() {
+    try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) { /* almacenamiento no disponible */ }
+    return null;
+  }
+  function persistir() {
+    try { localStorage.setItem(KEY, JSON.stringify(movimientos)); } catch (e) { /* modo privado, cuota, etc. */ }
+  }
+
+  let movimientos = leer() || semilla();
+
+  return {
+    todos() { return movimientos.slice(); },
+    pendientes() { return movimientos.filter(m => m.estado === 'pendiente'); },
+    agregar(mov) { movimientos.unshift(mov); persistir(); },
+    marcarSincronizados(ids) {
+      movimientos.forEach(m => { if (ids.includes(m.id)) m.estado = 'sincronizado'; });
+      persistir();
+    },
+    balance() {
+      return movimientos.reduce((acc, m) => acc + (m.tipo === 'ingreso' ? m.monto : -m.monto), BALANCE_BASE);
+    },
+    restablecer() { movimientos = semilla(); persistir(); }
+  };
+})();
+
+/* =====================================================================
+   ApiService (simulado)  ·  "servidor" de Controla+
+   Responde tras ~900 ms; falla si el panel activa "Simular fallo".
+   ===================================================================== */
+const ApiService = {
+  fallar: false,
+  enviar(movs) {
+    return new Promise((res, rej) => setTimeout(() => this.fallar ? rej(new Error('HTTP 503')) : res(movs.length), 900));
+  }
+};
+
+/* =====================================================================
+   SyncService  ·  sincronización de pendientes
+   Se dispara al recuperar la conexión, tras cada registro en línea y en
+   los reintentos programados después de un fallo.
+   ===================================================================== */
+const SyncService = (() => {
+  let sincronizando = false;
+  let reintento = null;
+
+  async function sincronizar(origen = 'manual') {
+    const pend = OfflineStorageService.pendientes();
+    if (!pend.length || sincronizando || !NetworkService.connected) return;
+    sincronizando = true;
+    Demo.log(`SyncService: enviando ${pend.length} pendiente(s) · origen: ${origen}`, 'info');
+    try {
+      await ApiService.enviar(pend);
+      OfflineStorageService.marcarSincronizados(pend.map(p => p.id));
+      UI.render();
+      UI.toast(MENSAJES.toastSyncOk(pend.length), 'cian');
+      Demo.log(`SyncService: ${pend.length} movimiento(s) sincronizado(s)`, 'on');
+    } catch (err) {
+      UI.toast(MENSAJES.toastSyncError, 'ambar');
+      Demo.log(`SyncService: fallo (${err.message}); reintento en ${REINTENTO_SYNC / 1000} s`, 'warn');
+      clearTimeout(reintento);
+      reintento = setTimeout(() => sincronizar('reintento'), REINTENTO_SYNC);
+    } finally {
+      sincronizando = false;
+    }
+  }
+  return { sincronizar };
+})();
+
+/* =====================================================================
+   MovimientosService  ·  lógica condicional online / offline
+   ---------------------------------------------------------------------
+   if (offline) → guardar local como 'pendiente' + toast amigable
+   if (online)  → guardar local + enviar al servidor + marcar sincronizado
+   ===================================================================== */
+const MovimientosService = {
+  async registrar({ concepto, monto, tipo }) {
+    const mov = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : 'm' + Date.now()),
+      concepto, monto, tipo,
+      fecha: new Date().toISOString(),
+      estado: 'pendiente'
+    };
+    OfflineStorageService.agregar(mov);   // siempre primero en el dispositivo
+    UI.render();
+
+    if (!NetworkService.connected) {
+      UI.toast(MENSAJES.toastGuardadoOffline, 'oscuro');
+      Demo.log(`Offline: "${concepto}" guardado localmente como pendiente`, 'off');
+      return;
+    }
+    Demo.log(`Online: enviando "${concepto}" al servidor`, 'info');
+    try {
+      await ApiService.enviar([mov]);
+      OfflineStorageService.marcarSincronizados([mov.id]);
+      UI.render();
+      UI.toast(MENSAJES.toastEnviadoOnline, 'cian');
+      Demo.log(`Servidor: "${concepto}" recibido`, 'on');
+    } catch (err) {
+      // Falló el envío estando en línea: queda pendiente y SyncService lo reintenta.
+      UI.toast(MENSAJES.toastSyncError, 'ambar');
+      Demo.log(`Servidor: fallo al enviar "${concepto}" (${err.message}); queda pendiente`, 'warn');
+      setTimeout(() => SyncService.sincronizar('reintento'), REINTENTO_SYNC);
+    }
+  }
+};
+
+/* =====================================================================
+   UI  ·  NetworkStatusComponent + lista de movimientos + toasts
+   ===================================================================== */
+const UI = (() => {
+  const $ = id => document.getElementById(id);
+  const fmt = n => 'RD$ ' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let toastTimer = null, bannerTimer = null;
+
+  function etiquetaFecha(iso) {
+    const d = new Date(iso), ahora = new Date();
+    if ((ahora - d) / 60000 < 1) return 'Ahora';
+    if (d.toDateString() === ahora.toDateString()) return 'Hoy';
+    const ayer = new Date(ahora); ayer.setDate(ahora.getDate() - 1);
+    if (d.toDateString() === ayer.toDateString()) return 'Ayer';
+    return d.toLocaleDateString('es-DO', { day: 'numeric', month: 'short' });
+  }
+  function hora(d = new Date()) {
+    const h = d.getHours(), m = String(d.getMinutes()).padStart(2, '0');
+    return `${h % 12 || 12}:${m} ${h < 12 ? 'a. m.' : 'p. m.'}`;
+  }
+
+  function renderEstado(conectado) {
+    const pill = $('pill');
+    pill.classList.toggle('offline', !conectado);
+    $('pillTexto').textContent = conectado ? MENSAJES.pillOnline : MENSAJES.pillOffline;
+    pill.setAttribute('aria-label', conectado ? 'Con conexión a Internet' : 'Sin conexión a Internet');
+    $('bannerOffline').classList.toggle('visible', !conectado);
+    if (!conectado) $('bannerOnline').classList.remove('visible');
+    const hint = $('sheetHint');
+    hint.textContent = conectado ? 'Se enviará al servidor al confirmar.' : 'Sin conexión: se guardará en tu teléfono y se enviará al reconectar.';
+    hint.classList.toggle('off', !conectado);
+  }
+
+  function mostrarBannerReconexion() {
+    const b = $('bannerOnline');
+    b.classList.remove('visible'); void b.offsetWidth; b.classList.add('visible');
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => b.classList.remove('visible'), DURACION_BANNER_RECONEXION);
+  }
+
+  function render() {
+    const lista = $('lista');
+    const movs = OfflineStorageService.todos();
+    if (!movs.length) { lista.innerHTML = '<p class="vacio">Aún no hay movimientos.</p>'; }
+    else {
+      lista.innerHTML = movs.map(m => `
+        <article class="mov ${m.tipo} ${m.estado === 'pendiente' ? 'pendiente' : ''}" data-id="${m.id}">
+          <div class="info">
+            <p class="concepto">${escapar(m.concepto)}</p>
+            <p class="fecha">${etiquetaFecha(m.fecha)}</p>
+          </div>
+          <span class="monto">${m.tipo === 'ingreso' ? '+' : '-'} ${fmt(m.monto)}</span>
+          ${m.estado === 'pendiente' ? `<span class="tag-pendiente">${MENSAJES.etiquetaPendiente}</span>` : ''}
+        </article>`).join('');
+    }
+    $('balance').textContent = fmt(OfflineStorageService.balance());
+    $('balanceMeta').textContent = `Actualizado hoy · ${hora()}`;
+  }
+
+  function toast(texto, variante = 'cian') {
+    const t = $('toast');
+    t.className = 'toast ' + variante;
+    t.textContent = texto;
+    void t.offsetWidth;
+    t.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('visible'), DURACION_TOAST);
+  }
+
+  function escapar(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  return { render, renderEstado, mostrarBannerReconexion, toast, hora };
+})();
+
+/* =====================================================================
+   Arranque · cableado de eventos
+   ===================================================================== */
+(function main() {
+  const $ = id => document.getElementById(id);
+
+  // Estado inicial (equivalente a: const status = await Network.getStatus())
+  Demo.estadoReal(NetworkService.realOnline);
+  UI.renderEstado(NetworkService.connected);
+  UI.render();
+  Demo.log(`Network.getStatus() → connected: ${NetworkService.connected}`, NetworkService.connected ? 'on' : 'off');
+
+  // Suscripción a cambios (equivalente a Network.addListener('networkStatusChange', ...))
+  NetworkService.onChange((conectado, origen) => {
+    Demo.log(`networkStatusChange → connected: ${conectado} · origen: ${origen}`, conectado ? 'on' : 'off');
+    UI.renderEstado(conectado);
+    if (conectado) {
+      UI.mostrarBannerReconexion();               // banner cian 3 s
+      SyncService.sincronizar('reconexión');      // envía los pendientes
+    }
+  });
+
+  // Reloj de la barra de estado
+  const tick = () => { const d = new Date(); $('reloj').textContent = `${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  tick(); setInterval(tick, 15000);
+
+  // ---- Hoja de registro ----
+  let tipo = 'gasto';
+  const abrir = () => { $('sheetBackdrop').classList.add('visible'); setTimeout(() => $('concepto').focus(), 50); };
+  const cerrar = () => { $('sheetBackdrop').classList.remove('visible'); $('formMov').reset(); };
+  $('fab').addEventListener('click', abrir);
+  $('btnNuevo').addEventListener('click', abrir);
+  $('cancelar').addEventListener('click', cerrar);
+  $('sheetBackdrop').addEventListener('click', e => { if (e.target === $('sheetBackdrop')) cerrar(); });
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.seg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); tipo = b.dataset.tipo;
+  }));
+  $('formMov').addEventListener('submit', e => {
+    e.preventDefault();
+    const concepto = $('concepto').value.trim();
+    const monto = parseFloat($('monto').value);
+    if (!concepto || !(monto > 0)) return;
+    cerrar();
+    MovimientosService.registrar({ concepto, monto, tipo });
+  });
+
+  // ---- Interruptores del panel ----
+  $('swAvion').addEventListener('change', e => NetworkService.simularModoAvion(e.target.checked));
+  $('swFallo').addEventListener('change', e => { ApiService.fallar = e.target.checked; Demo.log(`Servidor simulado: ${e.target.checked ? 'fallará' : 'responde OK'}`, 'warn'); });
+  $('swCaptura').addEventListener('change', e => document.body.classList.toggle('captura', e.target.checked));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.body.classList.contains('captura')) { $('swCaptura').checked = false; document.body.classList.remove('captura'); }
+      if ($('sheetBackdrop').classList.contains('visible')) cerrar();
+    }
+  });
+
+  // ---- Escenarios del documento ----
+  const setAvion = on => { $('swAvion').checked = on; NetworkService.simularModoAvion(on); };
+
+  // Pantalla A: conexión normal, sin pendientes.
+  $('btnA').addEventListener('click', () => {
+    setAvion(false);
+    Demo.log('Escenario A: estado normal con conexión', 'info');
+  });
+  // Pantalla B: sin conexión + un movimiento creado offline ("Colmado Don José").
+  $('btnB').addEventListener('click', () => {
+    setAvion(true);
+    Demo.log('Escenario B: sin conexión, registrando movimiento offline', 'info');
+    setTimeout(() => MovimientosService.registrar({ concepto: 'Colmado Don José', monto: 350, tipo: 'gasto' }), 350);
+  });
+  // Pantalla C: vuelve la conexión → banner cian + sincronización de pendientes.
+  $('btnC').addEventListener('click', () => {
+    const hayPendientes = OfflineStorageService.pendientes().length > 0;
+    if (NetworkService.connected && !hayPendientes) {
+      // Preparamos el escenario: perdemos la conexión, creamos un pendiente y reconectamos.
+      setAvion(true);
+      MovimientosService.registrar({ concepto: 'Colmado Don José', monto: 350, tipo: 'gasto' });
+      setTimeout(() => setAvion(false), 1200);
+    } else {
+      setAvion(false);
+    }
+    Demo.log('Escenario C: reconexión y sincronización automática', 'info');
+  });
+
+  $('btnReset').addEventListener('click', () => {
+    OfflineStorageService.restablecer(); UI.render();
+    Demo.log('Almacenamiento local restablecido a los datos de ejemplo', 'warn');
+  });
+})();
+</script>
+</body>
+</html>

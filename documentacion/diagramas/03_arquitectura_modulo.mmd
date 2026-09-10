@@ -1,0 +1,36 @@
+flowchart LR
+  subgraph UI["Capa de presentación"]
+    HP["HomePage"]
+    NSC["NetworkStatusComponent<br/>píldora · banners"]
+  end
+  subgraph CORE["Capa de servicios · src/app/core"]
+    NS["NetworkService"]
+    MS["MovimientosService<br/>lógica online / offline"]
+    SS["SyncService<br/>sincronización automática"]
+    OS["OfflineStorageService<br/>persistencia local"]
+    API["ApiService<br/>cliente HTTP"]
+  end
+  subgraph PLAT["Plataforma"]
+    CAP["@capacitor/network"]
+    IST["@ionic/storage<br/>IndexedDB / SQLite"]
+    HTTP["HttpClient → servidor REST"]
+  end
+  HP --> NSC
+  HP --> MS
+  NSC --> NS
+  MS --> OS
+  MS --> API
+  MS --> NS
+  MS --> SS
+  SS --> NS
+  SS --> OS
+  SS --> API
+  NS --> CAP
+  OS --> IST
+  API --> HTTP
+  classDef ui fill:#E6FBFA,stroke:#1AAFA8,color:#0A0F14;
+  classDef core fill:#EEF2FF,stroke:#4C7BFF,color:#0A0F14;
+  classDef plat fill:#F3F4F6,stroke:#6B7A85,color:#0A0F14;
+  class HP,NSC ui;
+  class NS,MS,SS,OS,API core;
+  class CAP,IST,HTTP plat;

@@ -1,0 +1,66 @@
+/* Línea gráfica Cyber de Controla+ */
+ion-toolbar {
+  --background: #0a0f14;
+  --color: #e8f6f5;
+  --border-color: #1e2a35;
+  --border-width: 0 0 1px 0;
+  --border-style: solid;
+}
+
+ion-title {
+  font-family: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-size: 22px;
+
+  .mas {
+    color: #22e0d6;
+  }
+}
+
+ion-content {
+  --background: #0a0f14;
+  --color: #e8f6f5;
+}
+
+ion-card.estado {
+  margin: 16px;
+  --background: #121a22;
+  border: 1px solid #1e2a35;
+  border-radius: 16px;
+  box-shadow: none;
+
+  ion-card-subtitle {
+    color: #6b7a85;
+    font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  ion-card-title {
+    color: #22e0d6;
+    font-family: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+    font-weight: 800;
+
+    &.offline {
+      color: #ff5a6e;
+    }
+  }
+
+  ion-card-content {
+    color: #e8f6f5;
+    font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+    font-size: 12px;
+
+    strong {
+      color: #4c7bff;
+    }
+
+    .ayuda {
+      margin-top: 12px;
+      color: #9fb0ba;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Controla<span class="mas">+</span></ion-title>
+    <!-- 2.1 Píldora de estado, siempre visible -->
+    <app-network-status slot="end" vista="pill"></app-network-status>
+  </ion-toolbar>
+  <!-- 2.2 / 2.4 Banners contextuales debajo de la barra superior -->
+  <app-network-status vista="banner"></app-network-status>
+</ion-header>
+
+<ion-content>
+  <ion-card class="estado" *ngIf="estado$ | async as estado">
+    <ion-card-header>
+      <ion-card-subtitle>Estado de red (Network.getStatus)</ion-card-subtitle>
+      <ion-card-title [class.offline]="!estado.connected">
+        {{ estado.connected ? 'Conectado' : 'Sin conexión' }}
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>connected: <strong>{{ estado.connected }}</strong></p>
+      <p>connectionType: <strong>{{ estado.connectionType }}</strong></p>
+      <p class="ayuda">
+        Activa y desactiva el modo avión: la píldora, el banner y estos valores
+        cambian en tiempo real gracias a networkStatusChange.
+      </p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

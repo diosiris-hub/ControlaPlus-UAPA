@@ -1,0 +1,89 @@
+/* Tokens de la línea gráfica Cyber de Controla+ (documento de diseño, sección 5) */
+:host {
+  --cp-grafito: #0a0f14;
+  --cp-hielo: #e8f6f5;
+  --cp-cian: #22e0d6;
+  --cp-card: #121a22;
+  --cp-borde: #1e2a35;
+  --cp-coral: #ff5a6e;
+  --cp-banner-off: #3a1218;
+  display: block;
+}
+
+/* ---------- Píldora ONLINE / OFFLINE ---------- */
+.net-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 8px 16px 8px 12px;
+  margin-inline-end: 12px;
+  background: var(--cp-card);
+  border: 1px solid var(--cp-borde);
+  border-radius: 999px;
+  font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--cp-hielo);
+
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--cp-cian);
+    color: var(--cp-cian);
+    animation: latido 2.4s ease-out infinite;
+  }
+
+  &.offline .dot {
+    background: var(--cp-coral);
+    color: var(--cp-coral);
+  }
+}
+
+@keyframes latido {
+  0% { box-shadow: 0 0 0 0 currentColor; }
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ---------- Banners ---------- */
+.net-banner {
+  animation: bajar 0.25s ease-out;
+
+  &.offline {
+    background: var(--cp-banner-off);
+    border-left: 6px solid var(--cp-coral);
+    padding: 12px 20px 14px 18px;
+
+    .titulo {
+      margin: 0 0 4px;
+      color: var(--cp-coral);
+      font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .texto {
+      margin: 0;
+      color: var(--cp-hielo);
+      font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  }
+
+  &.online {
+    background: var(--cp-cian);
+    color: var(--cp-grafito);
+    padding: 13px 20px;
+    font-family: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+  }
+}
+
+@keyframes bajar {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
