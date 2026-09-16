@@ -1,0 +1,84 @@
+/*
+ * Tokens globales de la línea gráfica Cyber de Controla+ y estilos de los
+ * elementos que Ionic monta fuera del componente (toasts y barra de pestañas).
+ *
+ * Cargar como PRIMERA línea de src/global.scss:  @use './theme/traspaso';
+ * (Sass exige que las reglas @use precedan a cualquier otra regla.)
+ */
+
+:root {
+  --cp-cian: #22e0d6;
+  --cp-azul: #4c7bff;
+  --cp-grafito: #0a0f14;
+  --cp-hielo: #e8f6f5;
+  --cp-card: #121a22;
+  --cp-border: #1e2a35;
+  --cp-muted: #7c8b99;
+  --cp-coral: #ff5a6e;
+  --cp-ambar: #ffc24b;
+}
+
+/*
+ * Toasts del módulo: fondo card, borde cian 2 px, esquinas 14 px, posición
+ * inferior, 4 s (la duración se fija en traspaso.page.ts).
+ */
+ion-toast.toast-traspaso {
+  --background: var(--cp-card);
+  --color: var(--cp-hielo);
+  --border-radius: 14px;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: var(--cp-cian);
+  --start: 16px;
+  --end: 16px;
+  font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+  font-size: 12px;
+}
+
+/*
+ * El toast va abajo, donde también está la barra de pestañas. Sin esto el
+ * recuadro queda por detrás de la barra y el mensaje se lee a medias.
+ * Se desplaza el elemento entero, no solo su contenido: el borde y el fondo
+ * los dibuja el contenedor externo, así que un margin-bottom en ::part()
+ * subiría el texto pero dejaría la caja tapada igual.
+ * 62 px es la altura de ion-tab-bar; el resto es aire.
+ */
+ion-toast.toast-traspaso {
+  transform: translateY(-74px);
+}
+
+/* Traspaso parcial o grupo vacío: estado pendiente en ámbar */
+ion-toast.toast-traspaso.toast-ambar {
+  --border-color: var(--cp-ambar);
+}
+
+/* Error: puerto ocupado, envío fallido */
+ion-toast.toast-traspaso.toast-coral {
+  --border-color: var(--cp-coral);
+}
+
+/* Barra de pestañas con la misma línea gráfica */
+ion-tab-bar.tabs-controla {
+  --background: var(--cp-card);
+  --color: var(--cp-muted);
+  --color-selected: var(--cp-cian);
+  --border: 1px solid var(--cp-border);
+  height: 62px;
+
+  ion-tab-button {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+
+    ion-label {
+      font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}

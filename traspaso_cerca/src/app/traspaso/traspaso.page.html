@@ -1,0 +1,164 @@
+<!--
+  Pantalla "Traspaso Cerca". Tres modos excluyentes:
+    menu    → elegir rol, con la nota del paso previo de Ajustes
+    recibir → servidor abierto, lista de lo que va llegando
+    enviar  → sondeo del grupo, selección de contenido y barra de progreso
+
+  El estado de la página son señales, así que se leen llamándolas: modo(),
+  buscando(), enviando(). Ver la nota de traspaso.page.ts sobre Angular 22.
+-->
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Traspaso <span class="acento">Cerca</span></ion-title>
+    <ion-button
+      *ngIf="modo() !== 'menu'"
+      slot="end"
+      fill="clear"
+      class="btn-volver"
+      [disabled]="enviando()"
+      (click)="volverAlMenu()"
+    >
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+      Menú
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- ==================== MENÚ ==================== -->
+  <ng-container *ngIf="modo() === 'menu'">
+    <p class="seccion">Paso previo</p>
+
+    <!-- El grupo P2P lo forma el sistema operativo; la app solo lo recuerda -->
+    <div class="tarjeta nota">
+      <ion-note>
+        Conecta ambos teléfonos en <strong>Ajustes → Wi-Fi → Wi-Fi Direct</strong>. Cuando
+        aparezcan emparejados, vuelve aquí y elige un modo en cada teléfono.
+      </ion-note>
+      <p class="pista">No hace falta router, Internet ni nube: los teléfonos hablan entre sí.</p>
+    </div>
+
+    <p class="seccion">Elige un modo</p>
+
+    <ion-button expand="block" class="btn-primario" (click)="recibir()">
+      Recibir en este teléfono
+    </ion-button>
+    <ion-button expand="block" fill="outline" class="btn-secundario" (click)="buscar()">
+      Enviar desde este teléfono
+    </ion-button>
+  </ng-container>
+
+  <!-- ==================== MODO RECEPTOR ==================== -->
+  <ng-container *ngIf="modo() === 'recibir'">
+    <p class="seccion">Recibiendo</p>
+
+    <div class="tarjeta estado">
+      <ion-spinner name="dots"></ion-spinner>
+      <div class="texto">
+        <h2>Esperando traspaso…</h2>
+        <p>En el otro teléfono, abre Traspaso Cerca y pulsa "Enviar".</p>
+      </div>
+    </div>
+
+    <ng-container *ngIf="servidor.recibidos$ | async as recibidos">
+      <p class="seccion" *ngIf="recibidos.length">Archivos recibidos ({{ recibidos.length }})</p>
+
+      <ion-list *ngIf="recibidos.length" lines="none">
+        <ion-item class="tarjeta-item" *ngFor="let a of recibidos; trackBy: trackPorNombre">
+          <ion-icon name="document-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h2>{{ a.nombre }}</h2>
+            <p class="meta">{{ a.bytes | number }} bytes</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ng-container>
+  </ng-container>
+
+  <!-- ==================== MODO EMISOR ==================== -->
+  <ng-container *ngIf="modo() === 'enviar'">
+    <p class="seccion">Teléfonos en el grupo</p>
+
+    <!-- El sondeo sigue en marcha mientras se responden las 21 IPs. Si el
+         usuario ya eligió receptor y el envío empezó, este aviso estorba. -->
+    <div class="tarjeta estado" *ngIf="buscando() && !enviando()">
+      <ion-spinner name="dots"></ion-spinner>
+      <div class="texto">
+        <h2>Buscando receptores en el grupo…</h2>
+        <p>Sondeando el rango 192.168.49.x</p>
+      </div>
+    </div>
+
+    <ng-container *ngIf="cliente.receptores$ | async as receptores">
+      <ion-list *ngIf="receptores.length" lines="none">
+        <ion-item
+          button
+          class="tarjeta-item receptor"
+          [class.elegido]="receptorElegido()?.ip === r.ip"
+          [disabled]="enviando()"
+          *ngFor="let r of receptores; trackBy: trackPorIp"
+          (click)="enviar(r)"
+        >
+          <ion-icon name="wifi-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h2>{{ r.dispositivo }}</h2>
+            <p class="meta">{{ r.ip }} · Toca para enviar</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <div class="tarjeta nota" *ngIf="!buscando() && !receptores.length">
+        <ion-note>
+          No apareció ningún teléfono. Comprueba el emparejamiento en Ajustes → Wi-Fi → Wi-Fi
+          Direct y que el otro esté en "Recibir".
+        </ion-note>
+        <ion-button expand="block" fill="outline" class="btn-secundario" (click)="buscar()">
+          Buscar de nuevo
+        </ion-button>
+      </div>
+    </ng-container>
+
+    <p class="seccion">Qué se traspasa</p>
+
+    <ion-list lines="none">
+      <ion-item
+        class="tarjeta-item"
+        [class.marcado]="c.sel"
+        *ngFor="let c of contenido(); trackBy: trackPorRuta"
+      >
+        <!-- Casilla controlada a mano: así el cambio pasa por la señal
+             contenido() y la vista se repinta también sin Zone.js -->
+        <ion-checkbox
+          slot="start"
+          [checked]="c.sel"
+          [disabled]="enviando()"
+          (ionChange)="alternar(c)"
+        ></ion-checkbox>
+        <ion-label>
+          <h2>{{ c.nombre }}</h2>
+          <p class="meta">{{ c.size }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <ion-note class="aviso" *ngIf="!haySeleccion()">
+      Marca al menos un elemento para poder traspasar.
+    </ion-note>
+
+    <!-- El progreso sale de progreso$, nunca de una variable de la página -->
+    <ng-container *ngIf="cliente.progreso$ | async as pr">
+      <p class="seccion">Progreso</p>
+      <div class="tarjeta progreso">
+        <ion-progress-bar [value]="pr.total ? pr.enviados / pr.total : 0"></ion-progress-bar>
+        <p class="meta">
+          <ng-container *ngIf="pr.archivo === 'completado'; else enCurso">
+            {{ pr.enviados }} de {{ pr.total }} · traspaso terminado
+          </ng-container>
+          <ng-template #enCurso>
+            Enviando {{ pr.archivo }} · {{ pr.enviados }} de {{ pr.total }}
+          </ng-template>
+        </p>
+      </div>
+    </ng-container>
+  </ng-container>
+</ion-content>

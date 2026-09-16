@@ -8,6 +8,9 @@ Capacitor. Este repositorio contiene el módulo de conectividad de la AP4: detec
 red en tiempo real, modo offline con almacenamiento local y sincronización automática al recuperar
 la conexión.
 
+Incluye además **Traspaso Cerca**, un módulo independiente que transfiere el respaldo, las fotos de
+recibos y los reportes entre dos teléfonos por Wi-Fi Direct, sin router, sin Internet y sin nube.
+
 ## Contenido
 
 | Carpeta / archivo | Descripción |
@@ -15,6 +18,7 @@ la conexión.
 | `detector_red/` | **Entregable 1.** `NetworkService` sobre `@capacitor/network` y `NetworkStatusComponent` (píldora ONLINE/OFFLINE y banners). |
 | `modo_offline/` | **Entregable 2.** Persistencia con `@ionic/storage`, lógica online/offline, sincronización automática con reintentos y prototipo web autónomo. |
 | `documentacion/` | **Entregable 3.** Documentación técnica (docx), diagramas de flujo y arquitectura, capturas con y sin conexión. |
+| `traspaso_cerca/` | **Módulo Traspaso Cerca.** Transferencia de archivos entre dos teléfonos por Wi-Fi Direct: mini servidor HTTP en el receptor y descubrimiento por sondeo del rango `192.168.49.x` en el emisor, sin código nativo. |
 | `Diseno_Interfaz_Conectividad_ControlaPlus.docx` | Diseño de interfaz: componentes, catálogo de mensajes y especificaciones de estilo. |
 | `index.html` | Prototipo interactivo del módulo; se abre directamente en el navegador. |
 | `capturas/` | Pantallas A (online), B (offline con movimiento pendiente), C (reconexión) y D (fallo de sincronización). |
@@ -37,3 +41,15 @@ Copia `detector_red/src/app/core/network` y `modo_offline/src/app/core/offline` 
 sigue los pasos del README de cada carpeta. El código se compiló en producción con Ionic 9,
 Angular 22 y Capacitor 8; para Ionic 7 u 8 solo cambia la ruta de importación a
 `@ionic/angular/standalone`.
+
+Traspaso Cerca se instala aparte, porque usa otros plugins:
+
+```bash
+npm install cordova-plugin-webserver @awesome-cordova-plugins/web-server
+npm install @capacitor/filesystem @capacitor/device
+npx cap sync
+```
+
+Copia `traspaso_cerca/src/app/services` y `traspaso_cerca/src/app/traspaso`, y sigue los pasos de
+`traspaso_cerca/README.md` (hay que declarar `WebServer` en los `providers` y permitir el tráfico
+en claro hacia `192.168.49.1`).

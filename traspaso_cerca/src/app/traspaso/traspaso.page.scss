@@ -1,0 +1,288 @@
+/*
+ * Traspaso Cerca — línea gráfica Cyber de Controla+.
+ * Los tokens se leen de las variables globales (src/theme/traspaso.scss) y se
+ * copian a variables Sass locales para poder usarlas dentro de funciones de
+ * color. No se usa ningún color por defecto de Ionic.
+ */
+$cian: #22e0d6;
+$azul: #4c7bff;
+$grafito: #0a0f14;
+$hielo: #e8f6f5;
+$card: #121a22;
+$borde: #1e2a35;
+$muted: #7c8b99;
+$coral: #ff5a6e;
+$ambar: #ffc24b;
+$pista-progreso: #0e2a2f;
+
+$mono: 'Martian Mono', ui-monospace, Menlo, monospace;
+$display: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+
+/* ---------------------------------------------------------------- cabecera */
+ion-toolbar {
+  --background: #{$grafito};
+  --color: #{$hielo};
+  --border-color: #{$borde};
+  --border-width: 0 0 1px 0;
+  --border-style: solid;
+}
+
+ion-title {
+  font-family: $display;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-size: 22px;
+
+  .acento {
+    color: $cian;
+  }
+}
+
+.btn-volver {
+  --color: #{$azul};
+  font-family: $mono;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ----------------------------------------------------------------- lienzo */
+ion-content {
+  --background: #{$grafito};
+  --color: #{$hielo};
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 8px;
+  --padding-bottom: 40px;
+}
+
+/* Encabezados de sección: monoespaciada, mayúsculas, cian, ~13 px */
+.seccion {
+  margin: 24px 0 12px;
+  font-family: $mono;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $cian;
+
+  &:first-of-type {
+    margin-top: 12px;
+  }
+}
+
+/* --------------------------------------------------------------- tarjetas */
+.tarjeta {
+  background: $card;
+  border: 2px solid $borde;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.tarjeta.nota {
+  ion-note {
+    display: block;
+    color: $hielo;
+    font-size: 14px;
+    line-height: 1.55;
+
+    strong {
+      color: $cian;
+      font-weight: 700;
+    }
+  }
+
+  .pista {
+    margin: 10px 0 0;
+    font-family: $mono;
+    font-size: 11px;
+    line-height: 1.5;
+    color: $muted;
+  }
+
+  ion-button {
+    margin-top: 14px;
+  }
+}
+
+/* Estado en curso: spinner + explicación */
+.tarjeta.estado {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  ion-spinner {
+    flex: 0 0 auto;
+    color: $cian;
+    width: 26px;
+    height: 26px;
+  }
+
+  .texto {
+    min-width: 0;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: $display;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: 14px;
+    color: $hielo;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-family: $mono;
+    font-size: 11px;
+    line-height: 1.5;
+    color: $muted;
+  }
+}
+
+/* --------------------------------------------------------- listas de items */
+ion-list {
+  background: transparent;
+  padding: 0;
+}
+
+ion-item.tarjeta-item {
+  --background: #{$card};
+  --background-hover: #{$card};
+  --background-activated: #{$card};
+  --color: #{$hielo};
+  --border-radius: 14px;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --min-height: 64px;
+  margin-bottom: 12px;
+  border: 2px solid $borde;
+  border-radius: 14px;
+
+  ion-icon[slot='start'] {
+    color: $cian;
+    font-size: 20px;
+    margin-inline-end: 14px;
+  }
+
+  h2 {
+    font-family: $display;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: 13px;
+    color: $hielo;
+  }
+
+  .meta {
+    font-family: $mono;
+    font-size: 11px;
+    color: $azul;
+  }
+
+  /* Tarjeta seleccionada: borde cian en lugar del borde neutro */
+  &.marcado,
+  &.elegido {
+    border-color: $cian;
+  }
+
+  ion-checkbox {
+    --checkbox-background-checked: #{$cian};
+    --border-color: #{$borde};
+    --border-color-checked: #{$cian};
+    --checkmark-color: #{$grafito};
+    --size: 22px;
+    --border-radius: 6px;
+    margin-inline-end: 14px;
+  }
+}
+
+/* IP y sugerencia del receptor en azul; el nombre manda en hielo */
+ion-item.receptor .meta {
+  color: $azul;
+}
+
+.aviso {
+  display: block;
+  margin-top: 4px;
+  font-family: $mono;
+  font-size: 11px;
+  line-height: 1.5;
+  color: $ambar;
+}
+
+/* --------------------------------------------------------------- progreso */
+.tarjeta.progreso {
+  ion-progress-bar {
+    --background: #{$pista-progreso};
+    --progress-background: #{$cian};
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .meta {
+    margin: 10px 0 0;
+    font-family: $mono;
+    font-size: 11px;
+    color: $muted;
+  }
+}
+
+/* ---------------------------------------------------------------- botones */
+/* Primario: fondo cian, texto grafito, mayúsculas, bold */
+ion-button.btn-primario {
+  --background: #{$cian};
+  --background-activated: #{$cian};
+  --background-hover: #{$cian};
+  --color: #{$grafito};
+  --border-radius: 14px;
+  --box-shadow: none;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  margin: 0 0 12px;
+  font-family: $mono;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Secundario: fondo card, borde azul 2 px, texto azul */
+ion-button.btn-secundario {
+  --background: #{$card};
+  --background-activated: #{$card};
+  --background-hover: #{$card};
+  --color: #{$azul};
+  --border-color: #{$azul};
+  --border-width: 2px;
+  --border-style: solid;
+  --border-radius: 14px;
+  --box-shadow: none;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  margin: 0 0 12px;
+  font-family: $mono;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Destructivo (cancelar): fondo card, borde y texto coral */
+ion-button.btn-destructivo {
+  --background: #{$card};
+  --background-activated: #{$card};
+  --background-hover: #{$card};
+  --color: #{$coral};
+  --border-color: #{$coral};
+  --border-width: 2px;
+  --border-style: solid;
+  --border-radius: 14px;
+  --box-shadow: none;
+  margin: 0 0 12px;
+  font-family: $mono;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
