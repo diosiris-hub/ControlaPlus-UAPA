@@ -19,6 +19,8 @@ recibos y los reportes entre dos teléfonos por Wi-Fi Direct, sin router, sin In
 | `modo_offline/` | **Entregable 2.** Persistencia con `@ionic/storage`, lógica online/offline, sincronización automática con reintentos y prototipo web autónomo. |
 | `documentacion/` | **Entregable 3.** Documentación técnica (docx), diagramas de flujo y arquitectura, capturas con y sin conexión. |
 | `traspaso_cerca/` | **Módulo Traspaso Cerca.** Transferencia de archivos entre dos teléfonos por Wi-Fi Direct: mini servidor HTTP en el receptor y descubrimiento por sondeo del rango `192.168.49.x` en el emisor, sin código nativo. |
+| `compartir_cerca/` | **Módulo Compartir Cerca.** Comparte un movimiento entre dos teléfonos por Bluetooth LE: emisor con `@capacitor-community/bluetooth-le` y receptor (periférico) con `cordova-plugin-bluetoothle` 6.7.4. El receptor acepta o rechaza el movimiento. |
+| `app/` | **Aplicación ejecutable** (Ionic 9 + Angular 22 + Capacitor 8) que ensambla `detector_red`, `modo_offline` y `compartir_cerca`, con pestañas Inicio y Compartir. `traspaso_cerca` no se integra. Se construye con `cd app && npm install && npx @ionic/cli build && npx cap sync android`. |
 | `Diseno_Interfaz_Conectividad_ControlaPlus.docx` | Diseño de interfaz: componentes, catálogo de mensajes y especificaciones de estilo. |
 | `index.html` | Prototipo interactivo del módulo; se abre directamente en el navegador. |
 | `capturas/` | Pantallas A (online), B (offline con movimiento pendiente), C (reconexión) y D (fallo de sincronización). |

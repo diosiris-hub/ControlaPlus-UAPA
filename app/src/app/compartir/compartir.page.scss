@@ -1,0 +1,326 @@
+/*
+ * Compartir Cerca — línea gráfica Cyber de Controla+.
+ * Base copiada de traspaso.page.scss (mismos tokens y clases) para que el
+ * módulo no dependa de Traspaso Cerca. Lo propio de este módulo está al final:
+ * tarjeta del movimiento, montos por tipo y lista de movimientos.
+ */
+$cian: #22e0d6;
+$azul: #4c7bff;
+$grafito: #0a0f14;
+$hielo: #e8f6f5;
+$card: #121a22;
+$borde: #1e2a35;
+$muted: #7c8b99;
+$coral: #ff5a6e;
+$ambar: #ffc24b;
+
+$mono: 'Martian Mono', ui-monospace, Menlo, monospace;
+$display: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+
+/* ---------------------------------------------------------------- cabecera */
+ion-toolbar {
+  --background: #{$grafito};
+  --color: #{$hielo};
+  --border-color: #{$borde};
+  --border-width: 0 0 1px 0;
+  --border-style: solid;
+}
+
+ion-title {
+  font-family: $display;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-size: 22px;
+
+  .acento {
+    color: $cian;
+  }
+}
+
+.btn-volver {
+  --color: #{$azul};
+  font-family: $mono;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ----------------------------------------------------------------- lienzo */
+ion-content {
+  --background: #{$grafito};
+  --color: #{$hielo};
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 8px;
+  --padding-bottom: 40px;
+}
+
+/* Encabezados de sección: monoespaciada, mayúsculas, cian, ~13 px */
+.seccion {
+  margin: 24px 0 12px;
+  font-family: $mono;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $cian;
+
+  &:first-of-type {
+    margin-top: 12px;
+  }
+}
+
+/* --------------------------------------------------------------- tarjetas */
+.tarjeta {
+  background: $card;
+  border: 2px solid $borde;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.tarjeta.nota {
+  ion-note {
+    display: block;
+    color: $hielo;
+    font-size: 14px;
+    line-height: 1.55;
+
+    strong {
+      color: $cian;
+      font-weight: 700;
+    }
+  }
+
+  .pista {
+    margin: 10px 0 0;
+    font-family: $mono;
+    font-size: 11px;
+    line-height: 1.5;
+    color: $muted;
+  }
+
+  ion-button {
+    margin-top: 14px;
+  }
+}
+
+/* Estado en curso: spinner + explicación */
+.tarjeta.estado {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  ion-spinner {
+    flex: 0 0 auto;
+    color: $cian;
+    width: 26px;
+    height: 26px;
+  }
+
+  .texto {
+    min-width: 0;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: $display;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: 14px;
+    color: $hielo;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-family: $mono;
+    font-size: 11px;
+    line-height: 1.5;
+    color: $muted;
+  }
+}
+
+/* --------------------------------------------------------- listas de items */
+ion-list {
+  background: transparent;
+  padding: 0;
+}
+
+ion-item.tarjeta-item {
+  --background: #{$card};
+  --background-hover: #{$card};
+  --background-activated: #{$card};
+  --color: #{$hielo};
+  --border-radius: 14px;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --min-height: 64px;
+  margin-bottom: 12px;
+  border: 2px solid $borde;
+  border-radius: 14px;
+
+  ion-icon[slot='start'] {
+    color: $cian;
+    font-size: 20px;
+    margin-inline-end: 14px;
+  }
+
+  h2 {
+    font-family: $display;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: 13px;
+    color: $hielo;
+  }
+
+  .meta {
+    font-family: $mono;
+    font-size: 11px;
+    color: $azul;
+  }
+
+  /* Tarjeta seleccionada: borde cian en lugar del borde neutro */
+  &.elegido {
+    border-color: $cian;
+  }
+}
+
+/* Sugerencia del receptor en azul; el nombre manda en hielo */
+ion-item.receptor .meta {
+  color: $azul;
+}
+
+.aviso {
+  display: block;
+  margin-top: 4px;
+  font-family: $mono;
+  font-size: 11px;
+  line-height: 1.5;
+  color: $ambar;
+}
+
+/* ---------------------------------------------------------------- botones */
+/* Primario: fondo cian, texto grafito, mayúsculas, bold */
+ion-button.btn-primario {
+  --background: #{$cian};
+  --background-activated: #{$cian};
+  --background-hover: #{$cian};
+  --color: #{$grafito};
+  --border-radius: 14px;
+  --box-shadow: none;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  margin: 0 0 12px;
+  font-family: $mono;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Secundario: fondo card, borde azul 2 px, texto azul */
+ion-button.btn-secundario {
+  --background: #{$card};
+  --background-activated: #{$card};
+  --background-hover: #{$card};
+  --color: #{$azul};
+  --border-color: #{$azul};
+  --border-width: 2px;
+  --border-style: solid;
+  --border-radius: 14px;
+  --box-shadow: none;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  margin: 0 0 12px;
+  font-family: $mono;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Destructivo (cancelar): fondo card, borde y texto coral */
+ion-button.btn-destructivo {
+  --background: #{$card};
+  --background-activated: #{$card};
+  --background-hover: #{$card};
+  --color: #{$coral};
+  --border-color: #{$coral};
+  --border-width: 2px;
+  --border-style: solid;
+  --border-radius: 14px;
+  --box-shadow: none;
+  margin: 0 0 12px;
+  font-family: $mono;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------- propio de Compartir Cerca */
+
+/* Montos: gasto en coral, ingreso en cian (igual que la Home) */
+.monto {
+  font-family: $mono;
+  font-weight: 700;
+  color: $coral;
+}
+
+.ingreso .monto {
+  color: $cian;
+}
+
+ion-item.tarjeta-item ion-note.monto {
+  font-size: 12px;
+}
+
+/* Tarjeta del movimiento: vista previa (emisor) y revisión (receptor) */
+.tarjeta.movimiento {
+  margin-bottom: 16px;
+  border-color: $coral;
+
+  &.ingreso {
+    border-color: $cian;
+  }
+
+  .de {
+    margin: 0 0 8px;
+    font-family: $mono;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $azul;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: $display;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: 18px;
+    color: $hielo;
+    overflow-wrap: anywhere;
+  }
+
+  .monto {
+    margin: 10px 0 0;
+    font-size: 22px;
+  }
+
+  .meta {
+    margin: 6px 0 0;
+    font-family: $mono;
+    font-size: 11px;
+    color: $muted;
+  }
+}
+
+.tarjeta.estado {
+  margin-bottom: 16px;
+}
+
+/* La lista de movimientos no debe empujar el botón de búsqueda fuera de vista */
+.lista-movimientos {
+  max-height: 45vh;
+  overflow-y: auto;
+}

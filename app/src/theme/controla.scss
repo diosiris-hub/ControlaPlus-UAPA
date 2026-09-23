@@ -1,0 +1,51 @@
+/*
+ * Tokens globales de la línea gráfica Cyber de Controla+ y barra de pestañas.
+ * Tomado de traspaso_cerca/src/theme/traspaso.scss (solo tokens y tab bar;
+ * los toasts de Traspaso Cerca no se integran).
+ */
+
+:root {
+  --cp-cian: #22e0d6;
+  --cp-azul: #4c7bff;
+  --cp-grafito: #0a0f14;
+  --cp-hielo: #e8f6f5;
+  --cp-card: #121a22;
+  --cp-border: #1e2a35;
+  --cp-muted: #7c8b99;
+  --cp-coral: #ff5a6e;
+  --cp-ambar: #ffc24b;
+}
+
+/*
+ * Los toasts de modo_offline van abajo, igual que la barra de pestañas (62 px).
+ * Sin este desplazamiento quedan detrás de la barra. toast-compartir ya lo
+ * trae en theme/compartir.scss.
+ */
+ion-toast.toast-controla {
+  transform: translateY(-74px);
+}
+
+ion-tab-bar.tabs-controla {
+  --background: var(--cp-card);
+  --color: var(--cp-muted);
+  --color-selected: var(--cp-cian);
+  --border: 1px solid var(--cp-border);
+  height: 62px;
+
+  ion-tab-button {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+
+    ion-label {
+      font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}

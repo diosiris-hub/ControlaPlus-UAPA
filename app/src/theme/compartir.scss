@@ -1,0 +1,36 @@
+/*
+ * Estilos globales de Compartir Cerca: los toasts, que Ionic monta fuera del
+ * componente y por eso no los alcanza compartir.page.scss.
+ *
+ * Cargar como PRIMERA línea de src/global.scss:  @use './theme/compartir';
+ * (Sass exige que las reglas @use precedan a cualquier otra regla.)
+ *
+ * Los valores de reserva de var() permiten usar el módulo sin cargar
+ * theme/traspaso.scss, que es el que define los tokens --cp-*.
+ */
+
+ion-toast.toast-compartir {
+  --background: var(--cp-card, #121a22);
+  --color: var(--cp-hielo, #e8f6f5);
+  --border-radius: 14px;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: var(--cp-cian, #22e0d6);
+  --start: 16px;
+  --end: 16px;
+  font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+  font-size: 12px;
+
+  /* Por encima de la barra de pestañas (62 px), igual que en Traspaso Cerca */
+  transform: translateY(-74px);
+}
+
+/* Rechazado, duplicado o nadie encontrado */
+ion-toast.toast-compartir.toast-ambar {
+  --border-color: var(--cp-ambar, #ffc24b);
+}
+
+/* Error: Bluetooth, permisos, conexión o datos no válidos */
+ion-toast.toast-compartir.toast-coral {
+  --border-color: var(--cp-coral, #ff5a6e);
+}

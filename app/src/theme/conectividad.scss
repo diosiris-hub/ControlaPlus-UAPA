@@ -1,0 +1,51 @@
+/*
+ * Estilos globales de los toasts del módulo de conectividad.
+ * Cargar como PRIMERA línea de src/global.scss:  @use './theme/conectividad';
+ * (Sass exige que las reglas @use precedan a cualquier otra regla.)
+ *
+ * Spec (documento de diseño): fondo #121A22 · borde 2 px · esquinas 14 px ·
+ * posición inferior · 4 s.
+ */
+ion-toast.toast-controla {
+  --background: #121a22;
+  --color: #e8f6f5;
+  --border-radius: 14px;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #22e0d6; /* variante cian (sincronización / envío ok) */
+  --start: 16px;
+  --end: 16px;
+  font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+  font-size: 12px;
+}
+
+/* Fallo al sincronizar */
+ion-toast.toast-ambar {
+  --border-color: #ffc24b;
+}
+
+/* Guardado sin conexión */
+ion-toast.toast-oscuro {
+  --border-color: #1e2a35;
+}
+
+/* Alerta de nuevo movimiento con la misma línea gráfica */
+ion-alert.alerta-controla {
+  --background: #121a22;
+  --color: #e8f6f5;
+
+  .alert-title {
+    font-family: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+    font-weight: 800;
+    color: #e8f6f5;
+  }
+  .alert-input {
+    color: #e8f6f5;
+    border-bottom-color: #1e2a35;
+  }
+  .alert-button {
+    color: #22e0d6;
+    font-family: 'Martian Mono', ui-monospace, Menlo, monospace;
+    letter-spacing: 0.08em;
+  }
+}

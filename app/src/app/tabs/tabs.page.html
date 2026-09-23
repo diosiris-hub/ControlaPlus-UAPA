@@ -1,0 +1,19 @@
+<!--
+  Barra de pestañas de Controla+. La clase tabs-controla aplica la línea
+  gráfica Cyber definida en src/theme/controla.scss.
+-->
+<ion-tabs>
+  <ion-router-outlet></ion-router-outlet>
+
+  <ion-tab-bar slot="bottom" class="tabs-controla">
+    <ion-tab-button tab="inicio">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Inicio</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="compartir">
+      <ion-icon name="bluetooth-outline"></ion-icon>
+      <ion-label>Compartir</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>
