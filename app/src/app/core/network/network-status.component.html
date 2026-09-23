@@ -1,0 +1,27 @@
+<!-- Píldora de estado: siempre visible en la barra superior -->
+<ng-container *ngIf="vista === 'pill'; else banners">
+  <div
+    class="net-pill"
+    [class.offline]="(isOnline$ | async) === false"
+    role="status"
+    aria-live="polite"
+    [attr.aria-label]="(isOnline$ | async) ? 'Con conexión a Internet' : 'Sin conexión a Internet'"
+  >
+    <span class="dot" aria-hidden="true"></span>
+    <span class="label">{{ (isOnline$ | async) ? mensajes.pillOnline : mensajes.pillOffline }}</span>
+  </div>
+</ng-container>
+
+<!-- Banners contextuales: se colocan debajo de la barra superior -->
+<ng-template #banners>
+  <!-- Fijo mientras dure la desconexión. No bloquea la app. -->
+  <div class="net-banner offline" *ngIf="(isOnline$ | async) === false" role="alert">
+    <p class="titulo">{{ mensajes.bannerOfflineTitulo }}</p>
+    <p class="texto">{{ mensajes.bannerOfflineTexto }}</p>
+  </div>
+
+  <!-- Temporal (3 s) al recuperar la conexión -->
+  <div class="net-banner online" *ngIf="reconectado$ | async" role="status">
+    {{ mensajes.bannerReconexion }}
+  </div>
+</ng-template>

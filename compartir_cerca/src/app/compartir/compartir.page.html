@@ -1,0 +1,197 @@
+<!--
+  Pantalla "Compartir Cerca" (BLE). Tres modos excluyentes:
+    menu    → elegir rol, con la nota de activar Bluetooth
+    recibir → anunciarse, revisar el movimiento entrante y Aceptar / Rechazar
+    enviar  → elegir movimiento, buscar, conectar, vista previa y Enviar
+
+  El estado de la página son señales: se leen llamándolas, p. ej. modo().
+-->
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Compartir <span class="acento">Cerca</span></ion-title>
+    <ion-button
+      *ngIf="modo() !== 'menu'"
+      slot="end"
+      fill="clear"
+      class="btn-volver"
+      [disabled]="enviando() || decidiendo()"
+      (click)="volverAlMenu()"
+    >
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+      Menú
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- ==================== MENÚ ==================== -->
+  <ng-container *ngIf="modo() === 'menu'">
+    <p class="seccion">Antes de empezar</p>
+
+    <div class="tarjeta nota">
+      <ion-note>
+        Enciende el <strong>Bluetooth</strong> en los dos teléfonos y mantenlos cerca. No hace
+        falta emparejarlos desde Ajustes.
+      </ion-note>
+      <p class="pista">Se comparte un solo movimiento. El otro teléfono decide si lo guarda.</p>
+    </div>
+
+    <p class="seccion">Elige un modo</p>
+
+    <ion-button expand="block" class="btn-primario" (click)="recibir()">
+      Recibir en este teléfono
+    </ion-button>
+    <ion-button expand="block" fill="outline" class="btn-secundario" (click)="enviarDesdeAqui()">
+      Enviar desde este teléfono
+    </ion-button>
+  </ng-container>
+
+  <!-- ==================== MODO RECEPTOR ==================== -->
+  <ng-container *ngIf="modo() === 'recibir'">
+    <ng-container *ngIf="receptor.entrante$ | async as m; else esperando">
+      <p class="seccion">Movimiento recibido</p>
+
+      <div class="tarjeta movimiento" [class.ingreso]="m.tipo === 'ingreso'">
+        <p class="de">De {{ m.de }}</p>
+        <h2>{{ m.concepto }}</h2>
+        <p class="monto">
+          {{ m.tipo === 'ingreso' ? '+' : '-' }} {{ m.monto | currency: 'DOP' : 'RD$ ' : '1.2-2' }}
+        </p>
+        <p class="meta">
+          {{ m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto' }} · {{ m.fecha | date: 'd MMM y · h:mm a' }}
+        </p>
+      </div>
+
+      <ion-button expand="block" class="btn-primario" [disabled]="decidiendo()" (click)="aceptar()">
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        Aceptar
+      </ion-button>
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="btn-destructivo"
+        [disabled]="decidiendo()"
+        (click)="rechazar()"
+      >
+        <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+        Rechazar
+      </ion-button>
+    </ng-container>
+
+    <ng-template #esperando>
+      <p class="seccion">Recibiendo</p>
+      <div class="tarjeta estado">
+        <ion-spinner name="dots"></ion-spinner>
+        <div class="texto">
+          <h2>Esperando un movimiento…</h2>
+          <p>En el otro teléfono, abre Compartir Cerca y pulsa "Enviar".</p>
+        </div>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <!-- ==================== MODO EMISOR ==================== -->
+  <ng-container *ngIf="modo() === 'enviar'">
+    <ng-container *ngIf="emisor.conectado$ | async as destino; else elegirYBuscar">
+      <!-- Paso final: vista previa antes de enviar -->
+      <p class="seccion">Vas a compartir</p>
+
+      <div
+        class="tarjeta movimiento"
+        *ngIf="movimientoElegido() as m"
+        [class.ingreso]="m.tipo === 'ingreso'"
+      >
+        <p class="de">Para {{ destino.nombre }}</p>
+        <h2>{{ m.concepto }}</h2>
+        <p class="monto">
+          {{ m.tipo === 'ingreso' ? '+' : '-' }} {{ m.monto | currency: 'DOP' : 'RD$ ' : '1.2-2' }}
+        </p>
+        <p class="meta">
+          {{ m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto' }} · {{ m.fecha | date: 'd MMM y · h:mm a' }}
+        </p>
+      </div>
+
+      <div class="tarjeta estado" *ngIf="enviando()">
+        <ion-spinner name="dots"></ion-spinner>
+        <div class="texto">
+          <h2>Esperando respuesta…</h2>
+          <p>{{ destino.nombre }} está revisando el movimiento.</p>
+        </div>
+      </div>
+
+      <ion-button expand="block" class="btn-primario" [disabled]="enviando()" (click)="enviar()">
+        Enviar movimiento
+      </ion-button>
+    </ng-container>
+
+    <ng-template #elegirYBuscar>
+      <!-- Paso 1: elegir el movimiento -->
+      <p class="seccion">1 · Elige un movimiento</p>
+
+      <ion-list lines="none" class="lista-movimientos">
+        <ion-item
+          button
+          class="tarjeta-item"
+          [class.elegido]="movimientoElegido()?.id === m.id"
+          [class.ingreso]="m.tipo === 'ingreso'"
+          *ngFor="let m of movimientos$ | async; trackBy: trackPorId"
+          (click)="elegir(m)"
+        >
+          <ion-label>
+            <h2>{{ m.concepto }}</h2>
+            <p class="meta">{{ m.fecha | date: 'd MMM · h:mm a' }}</p>
+          </ion-label>
+          <ion-note slot="end" class="monto">
+            {{ m.tipo === 'ingreso' ? '+' : '-' }} {{ m.monto | currency: 'DOP' : 'RD$ ' : '1.2-2' }}
+          </ion-note>
+        </ion-item>
+      </ion-list>
+
+      <!-- Paso 2: buscar el otro teléfono -->
+      <p class="seccion">2 · Busca el otro teléfono</p>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="btn-secundario"
+        [disabled]="!movimientoElegido() || buscando()"
+        (click)="buscar()"
+      >
+        <ion-icon name="bluetooth-outline" slot="start"></ion-icon>
+        Buscar teléfonos cercanos
+      </ion-button>
+
+      <ion-note class="aviso" *ngIf="!movimientoElegido()">
+        Elige primero el movimiento que quieres compartir.
+      </ion-note>
+
+      <div class="tarjeta estado" *ngIf="buscando()">
+        <ion-spinner name="dots"></ion-spinner>
+        <div class="texto">
+          <h2>Buscando teléfonos Controla+…</h2>
+          <p>Solo aparecen los que están en "Recibir".</p>
+        </div>
+      </div>
+
+      <ng-container *ngIf="emisor.receptores$ | async as receptores">
+        <ion-list *ngIf="receptores.length" lines="none">
+          <ion-item
+            button
+            class="tarjeta-item receptor"
+            [disabled]="conectando() || !movimientoElegido()"
+            *ngFor="let r of receptores; trackBy: trackPorDispositivo"
+            (click)="conectar(r)"
+          >
+            <ion-icon name="bluetooth-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h2>{{ r.nombre }}</h2>
+              <p class="meta">
+                {{ conectando() ? 'Conectando…' : 'Toca para conectar' }}
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ng-container>
+    </ng-template>
+  </ng-container>
+</ion-content>
