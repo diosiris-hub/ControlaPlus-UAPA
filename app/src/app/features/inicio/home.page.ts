@@ -24,10 +24,10 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
-import { NetworkStatusComponent } from '../core/network/network-status.component';
-import { MovimientosService } from '../core/offline/movimientos.service';
-import { Movimiento, TipoMovimiento } from '../core/offline/movimiento.model';
-import { MENSAJES } from '../core/offline/mensajes';
+import { NetworkStatusComponent } from '../../core/network/network-status.component';
+import { MovimientosService } from '../../core/offline/movimientos.service';
+import { Movimiento, TipoMovimiento } from '../../core/offline/movimiento.model';
+import { MENSAJES } from '../../core/offline/mensajes';
 
 @Component({
   selector: 'app-home',

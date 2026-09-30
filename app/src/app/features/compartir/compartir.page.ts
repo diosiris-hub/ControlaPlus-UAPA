@@ -36,11 +36,11 @@ import {
   closeCircleOutline,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
-import { OfflineStorageService } from '../core/offline/offline-storage.service';
-import { Movimiento } from '../core/offline/movimiento.model';
-import { BleEmisorService, ReceptorBle } from '../core/compartir/ble-emisor.service';
-import { BleReceptorService } from '../core/compartir/ble-receptor.service';
-import { RespuestaBle } from '../core/compartir/ble-protocolo';
+import { OfflineStorageService } from '../../core/offline/offline-storage.service';
+import { Movimiento } from '../../core/offline/movimiento.model';
+import { BleEmisorService, ReceptorBle } from '../../core/compartir/ble-emisor.service';
+import { BleReceptorService } from '../../core/compartir/ble-receptor.service';
+import { RespuestaBle } from '../../core/compartir/ble-protocolo';
 
 type Modo = 'menu' | 'recibir' | 'enviar';
 

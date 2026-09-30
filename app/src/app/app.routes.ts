@@ -11,15 +11,15 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: 'tabs',
-    loadComponent: () => import('./tabs/tabs.page').then((m) => m.TabsPage),
+    loadComponent: () => import('./layout/tabs/tabs.page').then((m) => m.TabsPage),
     children: [
       {
         path: 'inicio',
-        loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+        loadComponent: () => import('./features/inicio/home.page').then((m) => m.HomePage),
       },
       {
         path: 'compartir',
-        loadComponent: () => import('./compartir/compartir.page').then((m) => m.CompartirPage),
+        loadComponent: () => import('./features/compartir/compartir.page').then((m) => m.CompartirPage),
       },
       { path: '', redirectTo: 'inicio', pathMatch: 'full' },
     ],
@@ -27,7 +27,7 @@ export const routes: Routes = [
 
   {
     path: 'compartir',
-    loadComponent: () => import('./compartir/compartir.page').then((m) => m.CompartirPage),
+    loadComponent: () => import('./features/compartir/compartir.page').then((m) => m.CompartirPage),
   },
 
   { path: '', redirectTo: 'tabs/inicio', pathMatch: 'full' },
