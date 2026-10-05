@@ -21,6 +21,10 @@ export const routes: Routes = [
         path: 'compartir',
         loadComponent: () => import('./features/compartir/compartir.page').then((m) => m.CompartirPage),
       },
+      {
+        path: 'qr',
+        loadComponent: () => import('./features/qr/qr.page').then((m) => m.QrPage),
+      },
       { path: '', redirectTo: 'inicio', pathMatch: 'full' },
     ],
   },

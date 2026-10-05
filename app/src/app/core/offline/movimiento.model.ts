@@ -9,6 +9,12 @@ export type TipoMovimiento = 'gasto' | 'ingreso';
 
 export type EstadoSincronizacion = 'pendiente' | 'sincronizado';
 
+export interface UbicacionMovimiento {
+  latitud: number;
+  longitud: number;
+  simulada?: boolean;
+}
+
 export interface Movimiento {
   /** UUID generado en el dispositivo: el servidor lo usa para no duplicar. */
   id: string;
@@ -17,6 +23,7 @@ export interface Movimiento {
   tipo: TipoMovimiento;
   /** Fecha ISO 8601 de creación en el dispositivo. */
   fecha: string;
+  ubicacion?: UbicacionMovimiento;
   estado: EstadoSincronizacion;
 }
 
@@ -25,6 +32,7 @@ export interface NuevoMovimiento {
   concepto: string;
   monto: number;
   tipo: TipoMovimiento;
+  ubicacion?: UbicacionMovimiento;
 }
 
 /** Genera un identificador único en el cliente (idempotencia en el servidor). */

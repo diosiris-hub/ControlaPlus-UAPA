@@ -1,0 +1,89 @@
+$grafito: #0a0f14;
+$hielo: #e8f6f5;
+$cian: #22e0d6;
+$azul: #4c7bff;
+$card: #121a22;
+$borde: #1e2a35;
+$muted: #7c8b99;
+$mono: 'Martian Mono', ui-monospace, Menlo, monospace;
+$display: 'Unbounded', 'Avenir Next', system-ui, sans-serif;
+
+ion-toolbar {
+  --background: #{$grafito};
+  --color: #{$hielo};
+  --border-color: #{$borde};
+  --border-width: 0 0 1px 0;
+  --border-style: solid;
+}
+
+ion-content {
+  --background: #{$grafito};
+  --color: #{$hielo};
+}
+
+.qr-page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: $cian;
+  font-family: $mono;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+  color: $hielo;
+  font-family: $display;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.intro {
+  margin: 12px 0 24px;
+  color: $muted;
+  line-height: 1.6;
+}
+
+ion-button {
+  --background: #{$cian};
+  --background-activated: #18b8b0;
+  --color: #{$grafito};
+  --border-radius: 8px;
+  min-height: 50px;
+  font-weight: 800;
+}
+
+ion-spinner {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.resultado {
+  margin-top: 28px;
+  padding: 16px;
+  border: 1px solid $borde;
+  border-left: 3px solid $azul;
+  background: $card;
+
+  pre {
+    margin: 0;
+    color: $hielo;
+    font-family: $mono;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+}
+
+.mensaje {
+  margin-top: 20px;
+  color: $muted;
+  line-height: 1.6;
+}

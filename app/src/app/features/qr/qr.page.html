@@ -1,0 +1,40 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Escáner QR</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="qr-page">
+    <p class="eyebrow">{{ modoWeb ? 'MODO DE PRUEBA WEB' : 'CÁMARA · ML KIT' }}</p>
+    <h1>Leer código QR</h1>
+    <p class="intro">
+      {{ modoWeb ? 'El navegador muestra un resultado QR de prueba. En la app Android se usa la cámara.' : 'Escanea un código para mostrar aquí el contenido que contiene.' }}
+    </p>
+
+    <ion-button expand="block" (click)="escanear()" [disabled]="procesando()">
+      <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+      <ion-spinner *ngIf="procesando()" name="crescent"></ion-spinner>
+      {{ procesando() ? 'Preparando escáner' : (modoWeb ? 'Probar lectura QR' : 'Escanear QR') }}
+    </ion-button>
+
+    <section class="resultado" *ngIf="resultado()" aria-live="polite">
+      <p class="eyebrow">CONTENIDO LEÍDO</p>
+      <pre>{{ resultado() }}</pre>
+    </section>
+
+    <ion-button *ngIf="enlaceQr()" expand="block" fill="outline" (click)="abrirEnlace()">
+      Abrir enlace
+    </ion-button>
+
+    <section class="resultado" *ngIf="consulta()" aria-live="polite">
+      <p class="eyebrow">RESPUESTA GET · {{ modoWeb ? 'API SIMULADA' : 'API' }}</p>
+      <pre>{{ consulta() }}</pre>
+      <ion-button *ngIf="consultaDatos()?.datos" expand="block" fill="outline" (click)="agregarMovimiento()">
+        Agregar movimiento
+      </ion-button>
+    </section>
+
+    <p class="mensaje" *ngIf="mensaje()" role="status">{{ mensaje() }}</p>
+  </main>
+</ion-content>

@@ -41,6 +41,8 @@ export class NetworkService implements OnDestroy {
 
   private listener?: PluginListenerHandle;
   private inicializado = false;
+  private modoOfflinePrueba = false;
+  private conexionReal = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
   /** Estado completo (conectado + tipo de conexión). */
   readonly estado$: Observable<EstadoRed> = this.estadoSubject.asObservable();
@@ -79,9 +81,21 @@ export class NetworkService implements OnDestroy {
     return this.estadoSubject.value.connected;
   }
 
+  get modoOfflineDePrueba(): boolean {
+    return this.modoOfflinePrueba;
+  }
+
   /** Último estado completo conocido. */
   get estado(): EstadoRed {
     return this.estadoSubject.value;
+  }
+
+  setModoOfflinePrueba(activo: boolean): void {
+    this.modoOfflinePrueba = activo;
+    this.estadoSubject.next({
+      ...this.estadoSubject.value,
+      connected: this.conexionReal && !this.modoOfflinePrueba,
+    });
   }
 
   /** Fuerza una nueva consulta al sistema (útil tras volver del segundo plano). */
@@ -93,8 +107,9 @@ export class NetworkService implements OnDestroy {
 
   private actualizar(status: ConnectionStatus): void {
     console.log('Estado de red:', status.connected, '· tipo:', status.connectionType);
+    this.conexionReal = status.connected;
     this.estadoSubject.next({
-      connected: status.connected,
+      connected: status.connected && !this.modoOfflinePrueba,
       connectionType: status.connectionType,
     });
   }

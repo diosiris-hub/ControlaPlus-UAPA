@@ -6,6 +6,31 @@
   </ion-toolbar>
   <!-- 2.2 Banner offline fijo · 2.4 Banner de reconexión (3 s) -->
   <app-network-status vista="banner"></app-network-status>
+  <div class="acciones-prueba" aria-label="Controles de prueba">
+    <ion-button
+      fill="clear"
+      size="small"
+      [class.activo]="modoOfflinePrueba()"
+      [attr.aria-pressed]="modoOfflinePrueba()"
+      aria-label="Simular modo sin conexión"
+      title="Simular modo sin conexión"
+      (click)="alternarOfflinePrueba()"
+    >
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+    </ion-button>
+    <ion-button
+      fill="clear"
+      size="small"
+      [class.activo]="falloApiPrueba()"
+      [attr.aria-pressed]="falloApiPrueba()"
+      aria-label="Simular fallo de API"
+      title="Simular fallo de API"
+      (click)="alternarFalloApi()"
+    >
+      <ion-icon name="warning-outline"></ion-icon>
+    </ion-button>
+    <span>{{ modoOfflinePrueba() ? 'OFFLINE DE PRUEBA' : (falloApiPrueba() ? 'FALLO API ACTIVO' : 'MODO DE PRUEBA') }}</span>
+  </div>
 </ion-header>
 
 <ion-content>
@@ -27,6 +52,9 @@
       <ion-label>
         <h3>{{ m.concepto }}</h3>
         <p class="fecha">{{ m.fecha | date:'d MMM · h:mm a' }}</p>
+        <p class="fecha" *ngIf="m.ubicacion">
+          Ubicación {{ m.ubicacion.simulada ? 'demo' : 'GPS' }} · {{ m.ubicacion.latitud }}, {{ m.ubicacion.longitud }}
+        </p>
         <!-- 2.3 Etiqueta por movimiento creado sin conexión -->
         <p class="tag-pendiente" *ngIf="m.estado === 'pendiente'">{{ etiquetaPendiente }}</p>
       </ion-label>

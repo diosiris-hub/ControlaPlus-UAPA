@@ -29,6 +29,7 @@ import {
   ToastController,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
+import { Capacitor } from '@capacitor/core';
 import {
   arrowBackOutline,
   bluetoothOutline,
@@ -38,6 +39,7 @@ import {
 import { Subscription } from 'rxjs';
 import { OfflineStorageService } from '../../core/offline/offline-storage.service';
 import { Movimiento } from '../../core/offline/movimiento.model';
+import { MovimientosService } from '../../core/offline/movimientos.service';
 import { BleEmisorService, ReceptorBle } from '../../core/compartir/ble-emisor.service';
 import { BleReceptorService } from '../../core/compartir/ble-receptor.service';
 import { RespuestaBle } from '../../core/compartir/ble-protocolo';
@@ -72,6 +74,7 @@ export class CompartirPage implements OnDestroy {
   readonly emisor = inject(BleEmisorService);
   readonly receptor = inject(BleReceptorService);
   private readonly storage = inject(OfflineStorageService);
+  private readonly movimientos = inject(MovimientosService);
   private readonly toastCtrl = inject(ToastController);
 
   /** Movimientos de este teléfono, para elegir cuál compartir. */
@@ -83,6 +86,7 @@ export class CompartirPage implements OnDestroy {
   readonly conectando = signal(false);
   readonly enviando = signal(false);
   readonly decidiendo = signal(false);
+  readonly modoPrueba = !Capacitor.isNativePlatform();
 
   private readonly errores: Subscription;
 
@@ -101,6 +105,20 @@ export class CompartirPage implements OnDestroy {
   async recibir(): Promise<void> {
     this.modo.set('recibir');
     this.receptor.limpiar();
+    if (this.modoPrueba) {
+      this.receptor.entrante$.next({
+        v: 1,
+        app: 'ControlaPlus',
+        origenId: 'demo-recibido',
+        concepto: 'Almuerzo de prueba',
+        monto: 350,
+        tipo: 'gasto',
+        fecha: new Date().toISOString(),
+        de: 'Teléfono de prueba',
+      });
+      await this.toast('Movimiento de ejemplo listo para aceptar o rechazar.');
+      return;
+    }
     try {
       await this.receptor.iniciarRecepcion();
       await this.toast('Listo para recibir. En el otro teléfono, pulsa "Enviar".');
@@ -116,6 +134,19 @@ export class CompartirPage implements OnDestroy {
     }
     this.decidiendo.set(true);
     try {
+      if (this.modoPrueba) {
+        const entrante = this.receptor.entrante$.getValue();
+        if (entrante) {
+          await this.movimientos.registrar({
+            concepto: entrante.concepto,
+            monto: entrante.monto,
+            tipo: entrante.tipo,
+          });
+          this.receptor.entrante$.next(null);
+          await this.toast('Movimiento de prueba agregado a Inicio.');
+        }
+        return;
+      }
       const resultado = await this.receptor.aceptar();
       if (resultado === 'aceptado') {
         await this.toast('Movimiento agregado a tus registros.');
@@ -135,6 +166,11 @@ export class CompartirPage implements OnDestroy {
     }
     this.decidiendo.set(true);
     try {
+      if (this.modoPrueba) {
+        this.receptor.entrante$.next(null);
+        await this.toast('Movimiento de prueba rechazado; no se guardó.', 'ambar');
+        return;
+      }
       await this.receptor.rechazar();
       await this.toast('Movimiento rechazado. No se guardó nada.', 'ambar');
     } finally {
@@ -162,6 +198,13 @@ export class CompartirPage implements OnDestroy {
     }
     await this.emisor.limpiar();
     this.buscando.set(true);
+    if (this.modoPrueba) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      this.emisor.receptores$.next([{ deviceId: 'controlaplus-demo', nombre: 'Teléfono de prueba' }]);
+      this.buscando.set(false);
+      await this.toast('Destinatario simulado disponible.');
+      return;
+    }
     try {
       const hallados = await this.emisor.buscarReceptores();
       if (hallados.length === 0) {
@@ -182,6 +225,12 @@ export class CompartirPage implements OnDestroy {
       return;
     }
     this.conectando.set(true);
+    if (this.modoPrueba) {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      this.emisor.conectado$.next(r);
+      this.conectando.set(false);
+      return;
+    }
     try {
       await this.emisor.conectar(r);
     } catch (e) {
@@ -199,6 +248,13 @@ export class CompartirPage implements OnDestroy {
     }
 
     this.enviando.set(true);
+    if (this.modoPrueba) {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      this.enviando.set(false);
+      this.emisor.conectado$.next(null);
+      await this.toast(`${destino.nombre} aceptó el movimiento (prueba simulada).`);
+      return;
+    }
     try {
       const respuesta = await this.emisor.enviarMovimiento(mov);
       await this.avisarRespuesta(respuesta, destino.nombre);

@@ -19,6 +19,7 @@ import { NetworkService } from '../network/network.service';
 import { OfflineStorageService } from './offline-storage.service';
 import { ApiService } from './api.service';
 import { DURACION_TOAST_MS, MENSAJES, REINTENTO_SYNC_MS } from './mensajes';
+import { environment } from '../../../environments/environment';
 
 export interface ResultadoSync {
   origen: string;
@@ -71,7 +72,10 @@ export class SyncService {
     try {
       await this.api.enviarMovimientos(pendientes);
       await this.storage.marcarSincronizados(pendientes.map((m) => m.id));
-      await this.toast(MENSAJES.toastSyncOk(pendientes.length), 'cian');
+      const mensaje = environment.usarServidorSimulado
+        ? `Prueba completada: ${pendientes.length} movimiento(s) aceptado(s) por la API simulada.`
+        : MENSAJES.toastSyncOk(pendientes.length);
+      await this.toast(mensaje, 'cian');
       this.resultadoSubject.next({ origen, enviados: pendientes.length });
       return pendientes.length;
     } catch (err) {

@@ -36,6 +36,36 @@ ion-content {
   --padding-bottom: 120px;
 }
 
+.acciones-prueba {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-bottom: 1px solid $borde;
+  background: $card;
+
+  ion-button {
+    --color: #{$muted};
+    width: 34px;
+    height: 34px;
+    margin: 0;
+  }
+
+  ion-button.activo {
+    --color: #{$ambar};
+  }
+
+  span {
+    margin-left: 6px;
+    color: $muted;
+    font-family: $mono;
+    font-size: 9px;
+    font-weight: 700;
+  }
+}
+
 .balance {
   background: $card;
   border: 1px solid $borde;

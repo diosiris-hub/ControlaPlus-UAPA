@@ -26,6 +26,9 @@
 <ion-content class="ion-padding">
   <!-- ==================== MENÚ ==================== -->
   <ng-container *ngIf="modo() === 'menu'">
+    <div class="tarjeta nota" *ngIf="modoPrueba">
+      <ion-note>Modo de prueba web: los teléfonos y movimientos se simulan para recorrer el flujo sin Bluetooth.</ion-note>
+    </div>
     <p class="seccion">Antes de empezar</p>
 
     <div class="tarjeta nota">

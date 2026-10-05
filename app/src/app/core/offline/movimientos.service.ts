@@ -20,6 +20,7 @@ import { ApiService } from './api.service';
 import { SyncService } from './sync.service';
 import { DURACION_TOAST_MS, MENSAJES } from './mensajes';
 import { Movimiento, NuevoMovimiento, generarId } from './movimiento.model';
+import { environment } from '../../../environments/environment';
 
 /** Saldo previo a los movimientos registrados (demo). */
 const BALANCE_BASE = 21580;
@@ -54,6 +55,7 @@ export class MovimientosService {
       monto: datos.monto,
       tipo: datos.tipo,
       fecha: new Date().toISOString(),
+      ubicacion: datos.ubicacion,
       estado: 'pendiente',
     };
 
@@ -71,7 +73,10 @@ export class MovimientosService {
     try {
       await this.api.enviarMovimientos([movimiento]);
       await this.storage.marcarSincronizados([movimiento.id]);
-      await this.toast(MENSAJES.toastEnviadoOnline, 'cian');
+      await this.toast(
+        environment.usarServidorSimulado ? 'Registro completado con API simulada (POST).' : MENSAJES.toastEnviadoOnline,
+        'cian',
+      );
     } catch (err) {
       console.warn('Fallo al enviar estando en línea; queda pendiente →', err);
       await this.toast(MENSAJES.toastSyncError, 'ambar');
